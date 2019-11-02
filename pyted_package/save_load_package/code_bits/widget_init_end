@@ -1,0 +1,6 @@
+        if parent is None:
+            root.mainloop()
+        else:
+            if modal:
+                top_level.grab_set()
+                root.wait_window(top_level)

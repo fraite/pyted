@@ -1,0 +1,5 @@
+def bind_event(gui_binder, tk_widget, event_name, event_method):
+    if gui_binder is not None and not isinstance(gui_binder,dict):
+        tk_widget.bind(event_name, lambda
+                       event, arg1=tk_widget:
+                       event_method(event, arg1))

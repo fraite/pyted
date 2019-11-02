@@ -1,0 +1,11 @@
+def init_tk_var(tk_var, gui_binder, tk_var_name):
+    if gui_binder is not None:
+        if isinstance(gui_binder, dict):
+            try:
+                value = gui_binder[tk_var_name]
+            except KeyError:
+                value = None
+        else:
+            value = getattr(gui_binder, tk_var_name, None)
+        if value is not None:
+            tk_var.set(value)

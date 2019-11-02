@@ -1,0 +1,17 @@
+    def win_close(self):
+        gui_binder = getattr(self, 'gui_binder', None)
+        if gui_binder is not None:
+            if isinstance(gui_binder, dict):
+                for key in gui_binder:
+                    try:
+                        gui_binder[key] = getattr(self, key).get()
+                    except AttributeError:
+                        pass
+            else:
+                for key in vars(gui_binder):
+                    try:
+                        setattr(gui_binder, key, getattr(self, key).get())
+                    except AttributeError:
+                        pass
+                gui_binder.win_close()
+        self.{top_level_name}.destroy()
