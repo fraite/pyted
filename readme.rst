@@ -17,4 +17,8 @@ Download the pyted_package from Github.
 
 Use
 ===
-Run pyted.py
+Run pyted.py. For more information see the "quick_start" document in the "docs" directory.
+
+Development so Far
+==================
+The program is still in early development. There are many features missing, bugs, and comments missing.

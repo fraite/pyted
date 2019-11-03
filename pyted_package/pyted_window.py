@@ -8,6 +8,7 @@ class PytedWindow:
     def __init__(self, root, pyte_code):
         self.pyte_code = pyte_code
         self.win = root
+        self.win.title('Pyted')
         root.bind('<Escape>', pyte_code.escape_key_callback)
         root.bind('<Delete>', pyte_code.delete_key_callback)
 

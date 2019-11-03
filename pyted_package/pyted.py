@@ -83,7 +83,7 @@ class Pyted:
         self.handle_SE_canvas = tkinter.Canvas(self.root_window, background='red', width=5, height=5)
         # self.NW_canvas.place(x=500, y=30)
 
-        # setup toolbox frames by looking to see all tabs used by widgets
+        # setup toolbox frames adding tabs. Done by looking to see all tabs used by widgets
         self.toolbox_frames = {}
         for name, obj in inspect.getmembers(pyted_widget_types):
             if inspect.isclass(obj) and obj:
@@ -114,7 +114,7 @@ class Pyted:
                 try:
                     is_on_toolbox = obj.is_on_toolbox
                 except AttributeError:
-                    is_on_toolbox = True
+                    is_on_toolbox = False
                 if is_on_toolbox:
                     try:
                         new_button = ttk.Button(self.toolbox_frames[obj.tab], text=obj.label)
@@ -501,6 +501,9 @@ class Pyted:
         if attr_template == pyted_widget_types.CONFIG_CODE:
             tk_widget[attr] = getattr(pyte_widget, attr)
 
+        elif attr_template == pyted_widget_types.TITLE_CODE:
+            return
+
         elif attr_template == pyted_widget_types.GRID_CODE:
             if init:
                 # when user form is drawn grid placement will be handled by user form initialisation code
@@ -623,6 +626,12 @@ class Pyted:
             # self.update_navigator_tree()
             self.navigator_tree_change_item_name(pyte_widget, old_value)
             # raise Exception(f'renaming widget not yet implemented')
+
+        elif attr_template == pyted_widget_types.BESPOKE_CODE and (attr == 'comment'):
+            if init:
+                # when user form is drawn the tk_name will be handled by user form initialisation code
+                return
+            return
 
         elif attr_template == pyted_widget_types.BESPOKE_CODE and attr == 'tk_name':
             if init:
@@ -1343,9 +1352,12 @@ class Pyted:
         new_widget.parent = self.widgets[0].name
 
         self.widgets.append(new_widget)
+        self.selected_widget = new_widget
         self.build_navigator_tree()
+        self.update_attr_frame()
+        self.remove_selected_widget_handles()
         # print(len(self.widgets))
-        self.deselect_selected_widget()
+        #self.deselect_selected_widget()
         self.widget_in_toolbox_chosen = None
         # print(tk_widget_obj)
 

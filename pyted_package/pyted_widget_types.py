@@ -382,9 +382,9 @@ class TopLevel(PytedContainerWidget):
 
     # instance attributes
     comment: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
-    window_title: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
-    padx: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
-    pady: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    window_title: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': TITLE_CODE, 'options': None})
+    # padx: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    # pady: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     relief: str = field(default=tkinter.FLAT, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                         'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
                                                                     tkinter.GROOVE)})
