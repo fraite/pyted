@@ -1358,7 +1358,7 @@ class Pyted:
         self.update_attr_frame()
         self.remove_selected_widget_handles()
         # print(len(self.widgets))
-        #self.deselect_selected_widget()
+        # self.deselect_selected_widget()
         self.widget_in_toolbox_chosen = None
         # print(tk_widget_obj)
 

@@ -320,7 +320,6 @@ class Project(PytedWidget):
     # tab: str = field(default='Project', init=False)
     label: str = field(default='Project', init=False)
     is_on_toolbox: bool = field(default=False, init=False)
-    is_widget: bool = field(default=False, init=False)
 
     # instance attributes
     comment: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
@@ -339,7 +338,6 @@ class StringVar(PytedWidget):
     type: type = field(default=tkinter.StringVar, init=False)
     tab: str = field(default='Project', init=False)
     label: str = field(default='StringVar', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
     is_var: bool = field(default=True, init=False)
     is_widget: bool = field(default=False, init=False)
 
@@ -367,7 +365,6 @@ class TopLevel(PytedContainerWidget):
     type: type = field(default=tkinter.Toplevel, init=False)
     # tab: str = field(default='tkinter', init=False)
     label: str = field(default='Toplevel', init=False)
-    is_on_toolbox: bool = field(default=False, init=False)
 
     # instance attributes
     comment: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
@@ -392,7 +389,6 @@ class Label(PytedPlacedWidget):
     type: type = field(default=tkinter.Label, init=False)
     tab: str = field(default='tkinter', init=False)
     label: str = field(default='Label', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     anchor: str = field(default=tkinter.E, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
@@ -418,7 +414,6 @@ class Entry(PytedPlacedWidget):
     type: type = field(default=tkinter.Entry, init=False)
     tab: str = field(default='tkinter', init=False)
     label: str = field(default='Entry', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -444,7 +439,6 @@ class Button(PytedPlacedWidget):
     type: type = field(default=tkinter.Button, init=False)
     tab: str = field(default='tkinter', init=False)
     label: str = field(default='Button', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -469,7 +463,6 @@ class Radiobutton(PytedPlacedWidget):
     type: type = field(default=tkinter.Radiobutton, init=False)
     tab: str = field(default='tkinter', init=False)
     label: str = field(default='Radiobutton', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -497,7 +490,6 @@ class Checkbutton(PytedPlacedWidget):
     type: type = field(default=tkinter.Checkbutton, init=False)
     tab: str = field(default='tkinter', init=False)
     label: str = field(default='Checkbutton', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -526,7 +518,6 @@ class Frame(PytedContainerWidget, PytedPlacedWidget):
     type: type = field(default=tkinter.Frame, init=False)
     tab: str = field(default='tkinter', init=False)
     label: str = field(default='Frame', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -546,7 +537,6 @@ class TtkLabel(PytedPlacedWidget):
     type: type = field(default=ttk.Label, init=False)
     tab: str = field(default='ttk', init=False)
     label: str = field(default='TLabel', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     anchor: str = field(default=tkinter.E, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
@@ -568,7 +558,6 @@ class TtkEntry(PytedPlacedWidget):
     type: type = field(default=ttk.Entry, init=False)
     tab: str = field(default='ttk', init=False)
     label: str = field(default='TEntry', init=False)
-    is_on_toolbox: bool = field(default=True, init=False)
 
     # instance attributes
     state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
@@ -580,4 +569,21 @@ class TtkEntry(PytedPlacedWidget):
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Entry(self.{self.parent})\n'
+        return code
+
+
+@dataclass()
+class Notebook(PytedPlacedWidget):
+
+    # class attributes (or as close as we can get to class attributes)
+    type: type = field(default=ttk.Notebook, init=False)
+    tab: str = field(default='ttk', init=False)
+    label: str = field(default='Notebook', init=False)
+
+    # instance attributes
+    state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                         'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
+
+    def generate_code(self):
+        code = f'self.{self.name} = ttk.Notebook(self.{self.parent})\n'
         return code
