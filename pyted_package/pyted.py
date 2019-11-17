@@ -84,40 +84,45 @@ class Pyted:
         # self.NW_canvas.place(x=500, y=30)
 
         # setup toolbox frames adding tabs. Done by looking to see all tabs used by widgets
-        self.toolbox_frames = {}
+        toolbox_frames = {}
+        toolbox_row = {}
+        toolbox_column = {}
+        # force project to be the first tab
+        obj = pyted_widget_types.StringVar
+        tab = obj.tab
+        toolbox_frames[tab] = ttk.Frame(self.toolbox_notebook)
+        toolbox_row[tab] = 0
+        toolbox_column[tab] = 2
+        self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
+        ttk_label_button = ttk.Button(toolbox_frames[tab], text='pointer')
+        ttk_label_button.bind("<Button-1>", self.toolbox_pointer_button_click)
+        ttk_label_button.grid(column=0, row=0)
+        # get all the other tabs
         for name, obj in inspect.getmembers(pyted_widget_types):
             if inspect.isclass(obj) and obj:
-                try:
-                    is_on_toolbox = obj.is_on_toolbox
-                except AttributeError:
-                    is_on_toolbox = False
                 try:
                     tab = obj.tab
                 except AttributeError:
                     tab = None
-                if is_on_toolbox and tab not in self.toolbox_frames:
-                    self.toolbox_frames[tab] = ttk.Frame(self.toolbox_notebook)
-                    self.toolbox_notebook.add(self.toolbox_frames[tab], text=tab)
-                    ttk_label_button = ttk.Button(self.toolbox_frames[tab], text='pointer')
+                if tab is not None and tab not in toolbox_frames:
+                    toolbox_frames[tab] = ttk.Frame(self.toolbox_notebook)
+                    toolbox_row[tab] = 0
+                    toolbox_column[tab] = 2
+                    self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
+                    ttk_label_button = ttk.Button(toolbox_frames[tab], text='pointer')
                     ttk_label_button.bind("<Button-1>", self.toolbox_pointer_button_click)
                     ttk_label_button.grid(column=0, row=0)
 
         # set up inside of Toolbox Frame with buttons for each widget type
-        #
-        ttk_column = 2
-        ttk_row = 0
-        project_column = 2
-        project_row = 0
-        # self.toolbox_buttons = []
         for name, obj in inspect.getmembers(pyted_widget_types):
             if inspect.isclass(obj) and obj:
                 try:
-                    is_on_toolbox = obj.is_on_toolbox
+                    tab = obj.tab
                 except AttributeError:
-                    is_on_toolbox = False
-                if is_on_toolbox:
+                    tab = None
+                if tab is not None:
                     try:
-                        new_button = ttk.Button(self.toolbox_frames[obj.tab], text=obj.label)
+                        new_button = ttk.Button(toolbox_frames[tab], text=obj.label)
                         try:
                             is_var = obj.is_var
                         except AttributeError:
@@ -127,22 +132,18 @@ class Pyted:
                                             event, arg1=obj:
                                             self.toolbox_var_button_click_callback(event, arg1)
                                             )
-                            new_button.grid(column=project_column, row=project_row)
-                            project_column = project_column + 2
-                            if project_column >= 8:
-                                project_row = project_row + 2
-                                project_column = project_column - 8
                         else:
                             new_button.bind("<Button-1>", lambda
                                             event, arg1=obj:
                                             self.toolbox_button_click_callback(event, arg1)
                                             )
-                            new_button.grid(column=ttk_column, row=ttk_row)
-                            ttk_column = ttk_column + 2
-                            if ttk_column >= 8:
-                                ttk_row = ttk_row + 2
-                                ttk_column = ttk_column - 8
-                        # self.toolbox_buttons.append(new_button)
+                        new_button.grid(column=toolbox_column[tab], row=toolbox_row[tab])
+
+                        toolbox_column[tab] = toolbox_column[tab] + 2
+                        if toolbox_column[tab] >= 8:
+                            toolbox_row[tab] = toolbox_row[tab] + 2
+                            toolbox_column[tab] = toolbox_column[tab] - 8
+
                     except AttributeError:
                         pass
 

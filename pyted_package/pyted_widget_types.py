@@ -317,7 +317,7 @@ class Project(PytedWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default='project', init=False)
-    tab: str = field(default='Project', init=False)
+    # tab: str = field(default='Project', init=False)
     label: str = field(default='Project', init=False)
     is_on_toolbox: bool = field(default=False, init=False)
     is_widget: bool = field(default=False, init=False)
@@ -365,7 +365,7 @@ class TopLevel(PytedContainerWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=tkinter.Toplevel, init=False)
-    tab: str = field(default='tkinter', init=False)
+    # tab: str = field(default='tkinter', init=False)
     label: str = field(default='Toplevel', init=False)
     is_on_toolbox: bool = field(default=False, init=False)
 
