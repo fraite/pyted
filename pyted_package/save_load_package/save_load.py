@@ -10,7 +10,11 @@ def generate_code(widgets) -> str:
     code = ''
     code = code + f'import tkinter\n'
     # TODO check to see if ttk is needed
-    # code = code + f'from tkinter import ttk\n'
+    code = code + f'from tkinter import ttk\n'
+    # code = code + f'print(ttk.Style().theme_names())\n'
+    # code = code + f'print(ttk.Style().theme_use())\n'
+    # code = code + f'print(ttk.Style().theme_use("clam"))\n'
+    #
     code = code + f'\n'
     code = code + f'\n'
 

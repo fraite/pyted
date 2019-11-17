@@ -24,6 +24,7 @@ for more than one base class to be used. The classes are:
 """
 
 import tkinter
+from tkinter import ttk
 from dataclasses import dataclass, field, fields
 
 # the tkinter command to remove a widget from the grid
@@ -185,9 +186,6 @@ class PytedWidget:
             return attr_dict[template]
 
 
-#
-# PytedContainerWidget
-#
 @dataclass()
 class PytedContainerWidget(PytedWidget):
     """Parent class for pyted container widgets
@@ -305,9 +303,6 @@ class PytedPlacedWidget(PytedWidget):
                                                   'options': (True, False)})
 
 
-#
-# Project
-#
 @dataclass()
 class Project(PytedWidget):
     """Data for TopLevel widget
@@ -337,9 +332,6 @@ class Project(PytedWidget):
         return code
 
 
-#
-# Tkinter StringVar
-#
 @dataclass()
 class StringVar(PytedWidget):
 
@@ -359,9 +351,6 @@ class StringVar(PytedWidget):
         return code
 
 
-#
-# Tkinter TopLevel
-#
 @dataclass()
 class TopLevel(PytedContainerWidget):
     """Data for TopLevel widget
@@ -396,9 +385,6 @@ class TopLevel(PytedContainerWidget):
         return code
 
 
-#
-# TTK Label
-#
 @dataclass()
 class Label(PytedPlacedWidget):
 
@@ -425,9 +411,6 @@ class Label(PytedPlacedWidget):
         return code
 
 
-#
-# TTK Entry
-#
 @dataclass()
 class Entry(PytedPlacedWidget):
 
@@ -439,11 +422,14 @@ class Entry(PytedPlacedWidget):
 
     # instance attributes
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                         'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
     relief: str = field(default=tkinter.SUNKEN, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                           'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
                                                                       tkinter.GROOVE)})
     textvariable: str = field(default='', metadata={'type': STRING_VAR_OPTION, 'template': CONFIG_CODE,
                                                     'options': None})
+    # event attributes
     button_1: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Button-1>', 'options': None})
 
     def generate_code(self):
@@ -451,9 +437,6 @@ class Entry(PytedPlacedWidget):
         return code
 
 
-#
-# TTK Button
-#
 @dataclass()
 class Button(PytedPlacedWidget):
 
@@ -553,4 +536,48 @@ class Frame(PytedContainerWidget, PytedPlacedWidget):
 
     def generate_code(self):
         code = f'self.{self.name} = tkinter.Frame(self.{self.parent})\n'
+        return code
+
+
+@dataclass()
+class TtkLabel(PytedPlacedWidget):
+
+    # class attributes (or as close as we can get to class attributes)
+    type: type = field(default=ttk.Label, init=False)
+    tab: str = field(default='ttk', init=False)
+    label: str = field(default='TLabel', init=False)
+    is_on_toolbox: bool = field(default=True, init=False)
+
+    # instance attributes
+    anchor: str = field(default=tkinter.E, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                     'options': (tkinter.N, tkinter.NE, tkinter.E, tkinter.SE,
+                                                                 tkinter.S, tkinter.SW, tkinter.W, tkinter.NW,
+                                                                 tkinter.CENTER)})
+    text: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    underline: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+
+    def generate_code(self):
+        code = f'self.{self.name} = ttk.Label(self.{self.parent})\n'
+        return code
+
+
+@dataclass()
+class TtkEntry(PytedPlacedWidget):
+
+    # class attributes (or as close as we can get to class attributes)
+    type: type = field(default=ttk.Entry, init=False)
+    tab: str = field(default='ttk', init=False)
+    label: str = field(default='TEntry', init=False)
+    is_on_toolbox: bool = field(default=True, init=False)
+
+    # instance attributes
+    state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                         'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
+    textvariable: str = field(default='', metadata={'type': STRING_VAR_OPTION, 'template': CONFIG_CODE,
+                                                    'options': None})
+    # event attributes
+    button_1: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Button-1>', 'options': None})
+
+    def generate_code(self):
+        code = f'self.{self.name} = ttk.Entry(self.{self.parent})\n'
         return code
