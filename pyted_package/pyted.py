@@ -26,10 +26,6 @@ class Pyted:
         self.filler_labels = []
         self.widget_to_deselect_if_not_moved = None
         self.selected_widget = None
-        self.selected_widget_frame = None
-        self.selected_current_frame = None
-        self.selected_widget_current_column = None
-        self.selected_widget_current_row = None
         self.widget_in_toolbox_chosen = None
         self.proposed_widget = None
         self.proposed_widget_frame = None
@@ -678,15 +674,6 @@ class Pyted:
             if self.selected_widget is None or self.selected_widget != pyte_widget:
                 # no widget selected so selecting a widget or different widget selected
                 self.select_widget(pyte_widget)
-                # print('<<<< ', self.find_pyte_parent(pyte_widget), frame)
-                if pyte_widget.type == tkinter.Toplevel:
-                    self.selected_current_frame = None
-                    self.selected_widget_current_column = None
-                    self.selected_widget_current_row = None
-                else:
-                    self.selected_current_frame = self.find_pyte_parent(pyte_widget)
-                    self.selected_widget_current_column = pyte_widget.column
-                    self.selected_widget_current_row = pyte_widget.row
                 self.widget_to_deselect_if_not_moved = None
             else:
                 # may need to deselect widget if mouse not moved
@@ -714,9 +701,17 @@ class Pyted:
             # y_location = event.y_root - self.user_frame.winfo_rooty()
             # grid_location = self.user_frame.grid_location(x_location, y_location)
             frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
-            if (self.selected_widget_current_column == grid_location[0] and
-                self.selected_widget_current_row == grid_location[1] and
-                    self.selected_current_frame == frame):
+            if self.selected_widget.type == tkinter.Toplevel:
+                selected_widget_current_row = None
+                selected_widget_current_column = None
+                selected_widget_current_frame = None
+            else:
+                selected_widget_current_row = self.selected_widget.row
+                selected_widget_current_column = self.selected_widget.column
+                selected_widget_current_frame = self.find_pyte_parent(self.selected_widget)
+            if (selected_widget_current_column == grid_location[0] and
+                selected_widget_current_row == grid_location[1] and
+                    selected_widget_current_frame == frame):
                 # pointer has not moved from current location so no need to try to move the widget
                 return
             if grid_location[0] < 0 or grid_location[1] < 0:
@@ -748,8 +743,8 @@ class Pyted:
 
                 # put a new filler label at the old position where the widget was
                 # print('>>>>>>>>>>>>', self.selected_widget.name, self.selected_widget_current_column)
-                self.new_filler_label(self.selected_current_frame.tk_name, self.selected_widget_current_column,
-                                      self.selected_widget_current_row)
+                self.new_filler_label(selected_widget_current_frame.tk_name, selected_widget_current_column,
+                                      selected_widget_current_row)
 
                 # remove filler label from where the widget will move to
                 self.filler_labels.remove(widget_under_mouse)
@@ -763,13 +758,10 @@ class Pyted:
                     self.fill_tk_container_widget(self.selected_widget)
 
                 # self.selected_widget.tk_name.grid(column=grid_location[0], row=grid_location[1])
-                if self.selected_current_frame != frame:
+                if selected_widget_current_frame != frame:
                     widget_changed_frame = True
-                    self.selected_current_frame = frame
                 else:
                     widget_changed_frame = False
-                self.selected_widget_current_column = grid_location[0]
-                self.selected_widget_current_row = grid_location[1]
                 self.selected_widget.parent = frame.name
                 self.selected_widget.column = grid_location[0]
                 self.selected_widget.row = grid_location[1]
@@ -785,16 +777,6 @@ class Pyted:
             # print('current selected widget: ', self.selected_widget.name)
             self.deselect_selected_widget()
         self.selected_widget = new_selected_pyte_widget
-
-        # print(new_selected_pyte_widget.type)
-        if new_selected_pyte_widget.type == tkinter.Toplevel:
-            self.selected_current_frame = None
-            self.selected_widget_current_column = None
-            self.selected_widget_current_row = None
-        else:
-            self.selected_current_frame = self.find_pyte_parent(new_selected_pyte_widget)
-            self.selected_widget_current_column = new_selected_pyte_widget.column
-            self.selected_widget_current_row = new_selected_pyte_widget.row
 
         # place widget handles if required
         try:
@@ -1423,7 +1405,6 @@ class Pyted:
         self.proposed_widget = None
         self.build_navigator_tree()
         self.select_widget(new_widget)
-
 
         return 'break'
 
