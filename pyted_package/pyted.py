@@ -9,8 +9,7 @@ import pyted_package.save_load_package.save_load as save_load
 from pyted_package.pyted_window import PytedWindow
 
 FILLER_TEXT = '        .        '
-Pyted_Widget_Type = Union[pyted_widget_types.PytedContainerWidget,
-                          pyted_widget_types.Project, pyted_widget_types.StringVar,
+Pyted_Widget_Type = Union[pyted_widget_types.Project, pyted_widget_types.StringVar,
                           pyted_widget_types.TopLevel, pyted_widget_types.Label, pyted_widget_types.Entry,
                           pyted_widget_types.Frame, pyted_widget_types.Button, pyted_widget_types.Checkbutton]
 # update is_pyte_container if Pyte_Container_Type changed
@@ -315,7 +314,7 @@ class Pyted:
         for k, v in vars(pyte_widget).items():
             self.update_widget_attribute(pyte_widget, k, '', init=True)
 
-        if isinstance(pyte_widget, pyted_widget_types.PytedContainerWidget):
+        if isinstance(pyte_widget, pyted_widget_types.Frame):
             tk_new_widget.bind("<Motion>", self.user_motion_callback)
             # tk_new_widget.bind("<Button-1>", self.empty_label_click_callback)
             tk_new_widget.bind("<Button-1>", lambda
@@ -354,7 +353,7 @@ class Pyted:
                 if (int(pyte_widget.column) >= int(parent_pyte_widget.number_columns) or
                         int(pyte_widget.row) >= int(parent_pyte_widget.number_rows)):
                     pyte_widget.remove = True
-                elif isinstance(pyte_widget, pyted_widget_types.PytedContainerWidget):
+                elif isinstance(pyte_widget, pyted_widget_types.Frame):
                     self.place_pyte_widget(pyte_widget)
                     self.fill_tk_container_widget(pyte_widget)
                 else:
@@ -376,7 +375,7 @@ class Pyted:
         for child_widget in parent_pyte_widget.tk_name.grid_slaves():
             if child_widget in self.filler_labels:
                 self.filler_labels.remove(child_widget)
-            elif isinstance(self.get_pyte_widget(child_widget), pyted_widget_types.PytedContainerWidget):
+            elif isinstance(self.get_pyte_widget(child_widget), pyted_widget_types.Frame):
                 self.empty_tk_container_widget(self.get_pyte_widget(child_widget))
             child_widget.destroy()
 
@@ -395,7 +394,7 @@ class Pyted:
         :return: None
         """
         if self.widget_in_toolbox_chosen is None:
-            # print('<<<<', self.selected_widget, self.mouse_button1_pressed)
+            # print('<<<<', self.selected_widget.name, self.mouse_button1_pressed)
             if self.selected_widget is not None and self.mouse_button1_pressed:
                 # selection widget chosen so may need to move widget
                 self.widget_move(event)
@@ -425,7 +424,7 @@ class Pyted:
                     if widget_under_mouse in self.filler_labels:
                         self.proposed_widget_frame = frame
                         self.proposed_widget_location = grid_location
-                        if issubclass(self.widget_in_toolbox_chosen, pyted_widget_types.PytedContainerWidget):
+                        if self.widget_in_toolbox_chosen is pyted_widget_types.Frame:
                             self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name)
                             number_columns = self.widget_in_toolbox_chosen.number_columns
                             number_rows = self.widget_in_toolbox_chosen.number_rows
@@ -748,7 +747,7 @@ class Pyted:
                 #       self.selected_widget_current_row)
 
                 # put a new filler label at the old position where the widget was
-                # print('>>>>>>>>>>>>', self.selected_current_frame.name)
+                # print('>>>>>>>>>>>>', self.selected_widget.name, self.selected_widget_current_column)
                 self.new_filler_label(self.selected_current_frame.tk_name, self.selected_widget_current_column,
                                       self.selected_widget_current_row)
 
@@ -760,7 +759,7 @@ class Pyted:
                 self.selected_widget.tk_name.destroy()
                 clone = self.place_pyte_widget(self.selected_widget, tk_frame=frame.tk_name,
                                                column=grid_location[0], row=grid_location[1])
-                if isinstance(self.selected_widget, pyted_widget_types.PytedContainerWidget):
+                if isinstance(self.selected_widget, pyted_widget_types.Frame):
                     self.fill_tk_container_widget(self.selected_widget)
 
                 # self.selected_widget.tk_name.grid(column=grid_location[0], row=grid_location[1])
@@ -786,6 +785,16 @@ class Pyted:
             # print('current selected widget: ', self.selected_widget.name)
             self.deselect_selected_widget()
         self.selected_widget = new_selected_pyte_widget
+
+        # print(new_selected_pyte_widget.type)
+        if new_selected_pyte_widget.type == tkinter.Toplevel:
+            self.selected_current_frame = None
+            self.selected_widget_current_column = None
+            self.selected_widget_current_row = None
+        else:
+            self.selected_current_frame = self.find_pyte_parent(new_selected_pyte_widget)
+            self.selected_widget_current_column = new_selected_pyte_widget.column
+            self.selected_widget_current_row = new_selected_pyte_widget.row
 
         # place widget handles if required
         try:
@@ -933,7 +942,7 @@ class Pyted:
                     cb.set(widget_attr)
                     var_widgets = []
                     for widget in self.widgets:
-                        if isinstance(widget, pyted_widget_types.PytedContainerWidget):
+                        if isinstance(widget, pyted_widget_types.Frame):
                             var_widgets.append(widget.name)
                     cb['values'] = var_widgets
                     # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
@@ -1187,7 +1196,7 @@ class Pyted:
                     self.navigator_tree.insert(widget.parent, 'end', widget.name,
                                                text=widget.name, values='"' + repr(widget.type) + '"',
                                                tags='widget')
-                    if isinstance(widget, pyted_widget_types.PytedContainerWidget):
+                    if isinstance(widget, pyted_widget_types.Frame):
                         self.navigator_tree.item(widget.name, open=True)
                         self.build_navigator_tree_parent(widget)
 
@@ -1264,7 +1273,7 @@ class Pyted:
             try:
                 if (grid_location == (int(pyte_widget.column), int(pyte_widget.row)) and
                         pyte_widget.parent == pyte_frame.name):
-                    if isinstance(pyte_widget, pyted_widget_types.PytedContainerWidget):
+                    if isinstance(pyte_widget, pyted_widget_types.Frame):
                         pyte_widget, grid_location = self.find_grid_location(pyte_widget, x_root, y_root)
                         break
             except AttributeError:
@@ -1399,7 +1408,7 @@ class Pyted:
                                 )
         new_widget.tk_name.bind("<ButtonRelease-1>", self.widget_release)
 
-        if isinstance(new_widget, pyted_widget_types.PytedContainerWidget):
+        if isinstance(new_widget, pyted_widget_types.Frame):
             new_widget.number_columns = self.widget_in_toolbox_chosen.number_columns
             new_widget.number_rows = self.widget_in_toolbox_chosen.number_rows
             # replace binding for filler labels from proposed container filler labels to an inserted container type
@@ -1412,10 +1421,9 @@ class Pyted:
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
         self.proposed_widget = None
-        self.selected_widget = new_widget
-        self.place_selected_widget_handles(new_widget.tk_name)
-        self.update_attr_frame()
         self.build_navigator_tree()
+        self.select_widget(new_widget)
+
 
         return 'break'
 
