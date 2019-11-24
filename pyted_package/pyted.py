@@ -27,6 +27,7 @@ class Pyted:
         self.widget_to_deselect_if_not_moved = None
         self.selected_widget = None
         self.widget_in_toolbox_chosen = None
+        self.widget_in_toolbox_chosen_double_click = False
         self.proposed_widget = None
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
@@ -1368,7 +1369,7 @@ class Pyted:
             self.proposed_widget_location = None
 
     def inserted_widget_click(self, _event):
-        # print('new widget', event.x, event.y, self.proposed_widget)
+        # print('new widget', _event.x, _event.y, self.proposed_widget)
         new_widget = self.widget_in_toolbox_chosen()
         new_widget.parent = self.find_top_widget().name
         new_widget.parent = self.proposed_widget_frame.name
@@ -1405,7 +1406,9 @@ class Pyted:
         self.proposed_widget = None
         self.build_navigator_tree()
         self.select_widget(new_widget)
-
+        if not self.widget_in_toolbox_chosen_double_click:
+            self.widget_in_toolbox_chosen = None
+            # TODO: change toolbox back to pointer
         return 'break'
 
     def generate_unique_name(self, new_widget: pyted_widget_types) -> str:
