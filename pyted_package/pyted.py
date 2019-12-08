@@ -554,7 +554,6 @@ class Pyted:
                 # when user form is drawn the widget parent will be handled by user form initialisation code
                 return
             # self.empty_tk_container_widget(pyte_widget)
-            # TODO: seems to be error when resize hides widget, then resize back, then remove=false, then move
             self.empty_tk_container_widget(pyte_widget)
             self.fill_tk_container_widget(pyte_widget)
             self.place_selected_widget_handles(pyte_widget.tk_name)
