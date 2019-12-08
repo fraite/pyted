@@ -320,6 +320,7 @@ class Project(PytedWidget):
     # tab: str = field(default='Project', init=False)
     label: str = field(default='Project', init=False)
     is_on_toolbox: bool = field(default=False, init=False)
+    is_widget: bool = field(default=False, init=False)
 
     # instance attributes
     comment: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
