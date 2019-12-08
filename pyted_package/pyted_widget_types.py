@@ -320,7 +320,6 @@ class Project(PytedWidget):
     # tab: str = field(default='Project', init=False)
     label: str = field(default='Project', init=False)
     is_on_toolbox: bool = field(default=False, init=False)
-    is_widget: bool = field(default=False, init=False)
 
     # instance attributes
     comment: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
@@ -340,7 +339,6 @@ class StringVar(PytedWidget):
     tab: str = field(default='Project', init=False)
     label: str = field(default='StringVar', init=False)
     is_var: bool = field(default=True, init=False)
-    is_widget: bool = field(default=False, init=False)
 
     # instance attributes
     set: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': VAR_SET_CODE, 'options': None})

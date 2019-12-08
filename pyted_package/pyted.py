@@ -786,12 +786,10 @@ class Pyted:
 
         # place widget handles if required
         remove_or_parent_remove = True
-        try:
-            is_widget = new_selected_pyte_widget.is_widget
-        except AttributeError:
-            is_widget = True
+        is_widget = (isinstance(new_selected_pyte_widget, pyted_widget_types.PytedPlacedWidget) or
+                     isinstance(new_selected_pyte_widget, pyted_widget_types.TopLevel))
         if is_widget:
-            # check to see if widget attribute remove is True (or the parent of the widget)
+            # check to see if widget attribute "remove" is True (or the parent of the widget)
             remove_or_parent_remove = False
             widget_to_check = new_selected_pyte_widget
             while not widget_to_check.type == tkinter.Toplevel:
