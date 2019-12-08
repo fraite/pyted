@@ -641,20 +641,23 @@ class Pyted:
             raise Exception(f'renaming tk_name for widget should not occur')
 
         elif attr_template == pyted_widget_types.BESPOKE_CODE and attr == 'parent':
+            # not used as parent attribute not shown in attribute edit frame
             if init:
                 # when user form is drawn the widget parent will be handled by user form initialisation code
                 return
-            # TODO: implement renaming widget parent code
             raise Exception(f'renaming widget parent not yet implemented')
+
         elif attr_template == pyted_widget_types.VAR_SET_CODE:
             setattr(pyte_widget, pyted_widget_types.VAR_SET_CODE, new_value)
             # TODO: show widgets that use the variable with the variable value
             # TODO: preview does not widgets with initial variable values, but run coded does...
+
         elif attr_template.startswith('<'):
             if init:
                 # when user form is drawn the widget parent will be handled by user form initialisation code
                 return
             return
+
         else:
             raise Exception(f'attr_template "{attr_template}" not yet configured')
             # print(f'attr_template {attr_template} not yet implemented for {attr}')
