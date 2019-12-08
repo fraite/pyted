@@ -785,6 +785,7 @@ class Pyted:
         self.selected_widget = new_selected_pyte_widget
 
         # place widget handles if required
+        remove_or_parent_remove = True
         try:
             is_widget = new_selected_pyte_widget.is_widget
         except AttributeError:
@@ -803,10 +804,10 @@ class Pyted:
                     break
                 widget_to_check = self.find_pyte_widget(widget_to_check.parent)
 
-            if remove_or_parent_remove:
-                self.remove_selected_widget_handles()
-            else:
-                self.place_selected_widget_handles(self.selected_widget.tk_name)
+        if remove_or_parent_remove:
+            self.remove_selected_widget_handles()
+        else:
+            self.place_selected_widget_handles(self.selected_widget.tk_name)
 
         # fill out attribute tree, and attribute entry box
 
