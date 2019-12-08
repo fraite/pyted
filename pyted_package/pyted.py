@@ -694,8 +694,9 @@ class Pyted:
             # no widget selected so selecting a widget, or not in mouse pointer mode
             pass
         else:
-            # widget already selected so deselect it
-            self.deselect_selected_widget()
+            pass
+            # widget already selected but deselect widget function commented out
+            # self.deselect_selected_widget()
         return "break"
 
     def widget_move(self, event):
@@ -779,9 +780,6 @@ class Pyted:
 
     def select_widget(self, new_selected_pyte_widget) -> None:
         # print('new select widget: ', new_selected_pyte_widget.name)
-        if self.selected_widget is not None:
-            # print('current selected widget: ', self.selected_widget.name)
-            self.deselect_selected_widget()
         self.selected_widget = new_selected_pyte_widget
 
         # place widget handles if required
@@ -1216,25 +1214,6 @@ class Pyted:
         """Select parent container if filler label clicked"""
         frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
         self.select_widget(frame)
-        # self.widget_click(event, self.selected_widget)
-        # code used to deselect widgets
-        # if self.selected_widget is not None:
-        #    # TODO: Implement clicking selecting next frame up
-        #    self.deselect_selected_widget()
-
-        # self.mouse_button1_pressed = True
-        # if self.widget_in_toolbox_chosen is None:
-        #     self.selected_current_frame = frame
-        #     self.selected_widget_current_column = grid_location[0]
-        #     self.selected_widget_current_row = grid_location[1]
-        #     if self.selected_widget is None or self.selected_widget != frame:
-        #         # no widget selected so selecting a widget or different widget selected
-        #         self.select_widget(frame)
-        #         self.widget_to_deselect_if_not_moved = None
-        #     else:
-        #         # may need to deselect widget if mouse not moved
-        #         self.widget_to_deselect_if_not_moved = frame
-        #     return "break"
 
     def find_grid_location(self, pyte_frame: Pyted_Widget_Type, x_root: int, y_root: int)\
             -> (Pyted_Widget_Type, (int, int)):
