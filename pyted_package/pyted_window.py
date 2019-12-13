@@ -147,6 +147,27 @@ class PytedWindow:
         # self.attribute_frame2['padding'] = (5, 10)
         # ttk.Label(self.attribute_frame2, text="Name").grid(row=0, column=0, sticky='W')
         ttk.Label(self.row_col_frame2, text="Value").grid(row=0, column=1, sticky='W')
+        # variable use tab (a frame)
+        self.var_use_tab_frame = ttk.Frame(self.attribute_event_note2)
+        self.attribute_event_note2.add(self.var_use_tab_frame, text='usage')
+        # the canvas
+        self.var_use_canvas = tkinter.Canvas(self.var_use_tab_frame, bd=0, highlightthickness=0)
+        self.var_use_canvas.pack(side=tkinter.LEFT, fill=tkinter.BOTH, expand=tkinter.TRUE)
+        # self.attr_canvas.grid(row=0, column=0)
+        self.var_use_scrollbar_attributes2 = ttk.Scrollbar(self.var_use_tab_frame, orient=tkinter.VERTICAL,
+                                                           command=self.row_col_canvas.yview)
+        self.var_use_scrollbar_attributes2.pack(fill=tkinter.Y, side=tkinter.RIGHT, expand=tkinter.FALSE)
+        # self.scrollbar_attributes2.grid(row=0, column=1, sticky="NS")
+        self.var_use_canvas['yscrollcommand'] = self.var_use_scrollbar_attributes2.set
+        self.var_use_frame2 = ttk.Frame(self.var_use_canvas)
+        self.var_use_canvas.create_window((0, 0), window=self.var_use_frame2, anchor='nw')
+        self.var_use_frame2.bind('<Configure>', self.frame_func)
+        self.var_use_frame2.grid_columnconfigure(0, minsize=150)
+        # self.attribute_frame2.grid(row=0, column=1, sticky='NSEW')
+        # self.attribute_frame2['padding'] = (5, 10)
+        # ttk.Label(self.attribute_frame2, text="Name").grid(row=0, column=0, sticky='W')
+        ttk.Label(self.var_use_frame2, text="Variable name").grid(row=0, column=0, sticky='W')
+        ttk.Label(self.var_use_frame2, text="Type").grid(row=0, column=1, sticky='W')
 
         #
         # set resize behaviour

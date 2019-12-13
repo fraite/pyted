@@ -39,6 +39,8 @@ class Pyted:
         self.attr_input_method = tkinter.Entry
         self.attr_labels: List[tkinter.Widget] = []
         self.attr_widgets: List[tkinter.Widget] = []
+        self.var_labels: List[tkinter.Widget] = []
+        self.var_widgets: List[tkinter.Widget] = []
 
         # set up test user form
         #
@@ -61,15 +63,18 @@ class Pyted:
         self.widgets.append(widget)
 
         # set up window
-        toolbox = PytedWindow(self.root_window, self)
-        self.background_user_frame = toolbox.background_user_frame
-        self.user_frame = toolbox.user_frame
-        self.toolbox_notebook = toolbox.toolbox_notebook
-        # self.ttk_toolbox_frame = toolbox.ttk_toolbox_frame
-        self.navigator_tree = toolbox.navigator_tree
-        self.attr_frame = toolbox.attribute_frame2
-        self.event_frame = toolbox.event_frame2
-        self.row_col_frame = toolbox.row_col_frame2
+        pyted_window = PytedWindow(self.root_window, self)
+        self.background_user_frame = pyted_window.background_user_frame
+        self.user_frame = pyted_window.user_frame
+        self.toolbox_notebook = pyted_window.toolbox_notebook
+        # self.ttk_toolbox_frame = pyted_window.ttk_toolbox_frame
+        self.navigator_tree = pyted_window.navigator_tree
+        self.attr_frame = pyted_window.attribute_frame2
+        self.event_frame = pyted_window.event_frame2
+        self.row_col_frame = pyted_window.row_col_frame2
+        self.var_use_frame = pyted_window.var_use_frame2
+        self.attr_notebook = pyted_window.attribute_event_note2
+        self.pyted_window = pyted_window
 
         parent_pyte_widget = self.draw_user_frame()
 
@@ -858,14 +863,14 @@ class Pyted:
         for attr_widget in self.attr_widgets:
             attr_widget.destroy()
         self.attr_widgets = []
-        pyte_widget = self.selected_widget
+        selected_pyte_widget = self.selected_widget
         attr_row = 0
         event_row = 0
         if self.selected_widget is None:
             return
-        for k, v in pyte_widget.get_input_type().items():
+        for k, v in selected_pyte_widget.get_input_type().items():
             if v != pyted_widget_types.NO_INPUT:
-                if pyte_widget.get_code_template(k).startswith('<'):
+                if selected_pyte_widget.get_code_template(k).startswith('<'):
                     property_frame = self.event_frame
                     event_row = event_row + 1
                     property_row = event_row
@@ -877,7 +882,7 @@ class Pyted:
                 lab.grid(row=property_row, column=0, sticky='W')
                 self.attr_labels.append(lab)
                 if v == pyted_widget_types.SINGLE_INPUT:
-                    widget_attr = getattr(pyte_widget, k)
+                    widget_attr = getattr(selected_pyte_widget, k)
                     e = ttk.Entry(property_frame, takefocus=True)
                     e.grid(row=property_row, column=1, sticky='NWES')
                     e.insert(0, str(widget_attr))
@@ -893,7 +898,7 @@ class Pyted:
                            )
                     self.attr_widgets.append(e)
                 elif v == pyted_widget_types.SINGLE_OPTION:
-                    widget_attr = getattr(pyte_widget, k)
+                    widget_attr = getattr(selected_pyte_widget, k)
                     cb = ttk.Combobox(property_frame)
                     cb.configure(state='readonly')
                     cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
@@ -906,7 +911,7 @@ class Pyted:
                             )
                     self.attr_widgets.append(cb)
                 elif v == pyted_widget_types.BOOL_INPUT:
-                    widget_attr = getattr(pyte_widget, k)
+                    widget_attr = getattr(selected_pyte_widget, k)
                     cb = ttk.Combobox(property_frame)
                     cb.configure(state='readonly')
                     cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
@@ -922,7 +927,7 @@ class Pyted:
                             )
                     self.attr_widgets.append(cb)
                 elif v == pyted_widget_types.PARENT_OPTION:
-                    widget_attr = getattr(pyte_widget, k)
+                    widget_attr = getattr(selected_pyte_widget, k)
                     cb = ttk.Combobox(property_frame)
                     cb.configure(state='readonly')
                     cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
@@ -939,7 +944,7 @@ class Pyted:
                             )
                     self.attr_widgets.append(cb)
                 elif v == pyted_widget_types.STRING_VAR_OPTION:
-                    widget_attr = getattr(pyte_widget, k)
+                    widget_attr = getattr(selected_pyte_widget, k)
                     cb = ttk.Combobox(property_frame)
                     cb.configure(state='readonly')
                     cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
@@ -956,12 +961,12 @@ class Pyted:
                             )
                     self.attr_widgets.append(cb)
                 elif v == pyted_widget_types.STRING_EVENT_OPTION:
-                    widget_attr = getattr(pyte_widget, k)
+                    widget_attr = getattr(selected_pyte_widget, k)
                     cb = ttk.Combobox(property_frame)
                     cb.configure(state='readonly')
                     cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
                     cb.set(widget_attr)
-                    var_widgets = ['', pyte_widget.name + '_' + k]
+                    var_widgets = ['', selected_pyte_widget.name + '_' + k]
                     cb['values'] = var_widgets
                     # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
                     cb.bind('<<ComboboxSelected>>', lambda
@@ -973,12 +978,13 @@ class Pyted:
                     raise Exception('input type not defined')
 
         # fill row/col tab
-        if isinstance(pyte_widget, pyted_widget_types.PytedPlacedWidget):
+        if isinstance(selected_pyte_widget, pyted_widget_types.PytedPlacedWidget):
+            self.attr_notebook.add(self.pyted_window.row_col_tab_frame)
             # row weight
             lab = tkinter.Label(self.row_col_frame, text='row weight')
             lab.grid(row=1, column=0, sticky='W')
             self.attr_labels.append(lab)
-            row_config = self.find_pyte_parent(pyte_widget).get_row_configuration(pyte_widget.row)
+            row_config = self.find_pyte_parent(selected_pyte_widget).get_row_configuration(selected_pyte_widget.row)
             widget_attr = row_config['weight']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=1, column=1, sticky='NWES')
@@ -996,7 +1002,7 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='row minsize')
             lab.grid(row=2, column=0, sticky='W')
             self.attr_labels.append(lab)
-            row_config = self.find_pyte_parent(pyte_widget).get_row_configuration(pyte_widget.row)
+            row_config = self.find_pyte_parent(selected_pyte_widget).get_row_configuration(selected_pyte_widget.row)
             widget_attr = row_config['minsize']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=2, column=1, sticky='NWES')
@@ -1014,7 +1020,7 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='row pad')
             lab.grid(row=3, column=0, sticky='W')
             self.attr_labels.append(lab)
-            row_config = self.find_pyte_parent(pyte_widget).get_row_configuration(pyte_widget.row)
+            row_config = self.find_pyte_parent(selected_pyte_widget).get_row_configuration(selected_pyte_widget.row)
             widget_attr = row_config['pad']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=3, column=1, sticky='NWES')
@@ -1032,7 +1038,7 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='col weight')
             lab.grid(row=4, column=0, sticky='W')
             self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(pyte_widget).get_column_configuration(pyte_widget.column)
+            col_config = self.find_pyte_parent(selected_pyte_widget).get_column_configuration(selected_pyte_widget.column)
             widget_attr = col_config['weight']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=4, column=1, sticky='NWES')
@@ -1050,7 +1056,7 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='col minsize')
             lab.grid(row=5, column=0, sticky='W')
             self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(pyte_widget).get_column_configuration(pyte_widget.column)
+            col_config = self.find_pyte_parent(selected_pyte_widget).get_column_configuration(selected_pyte_widget.column)
             widget_attr = col_config['minsize']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=5, column=1, sticky='NWES')
@@ -1068,7 +1074,7 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='col pad')
             lab.grid(row=6, column=0, sticky='W')
             self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(pyte_widget).get_column_configuration(pyte_widget.column)
+            col_config = self.find_pyte_parent(selected_pyte_widget).get_column_configuration(selected_pyte_widget.column)
             widget_attr = col_config['pad']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=6, column=1, sticky='NWES')
@@ -1082,6 +1088,43 @@ class Pyted:
                    self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
                    )
             self.attr_widgets.append(e)
+        else:
+            self.attr_notebook.hide(self.pyted_window.row_col_tab_frame)
+
+        # fill variable usage tab
+        if isinstance(selected_pyte_widget, pyted_widget_types.StringVar):
+            self.attr_notebook.add(self.pyted_window.var_use_tab_frame)
+            for var_label in self.var_labels:
+                var_label.destroy()
+            self.var_labels = []
+            for var_widget in self.var_widgets:
+                var_widget.destroy()
+            self.var_widgets = []
+            var_row = 0
+            if self.selected_widget is None:
+                return
+            for pyted_widget_search in self.widgets:
+                try:
+                    var_name = pyted_widget_search.textvariable
+                except AttributeError:
+                    var_name = None
+                if var_name is None:
+                    try:
+                        var_name = pyted_widget_search.variable
+                    except AttributeError:
+                        var_name = None
+
+                if var_name == selected_pyte_widget.name:
+                    var_use_frame = self.var_use_frame
+                    var_row = var_row + 1
+                    lab = tkinter.Label(var_use_frame, text=pyted_widget_search.name)
+                    lab.grid(row=var_row, column=0, sticky='W')
+                    self.var_labels.append(lab)
+                    lab = tkinter.Label(var_use_frame, text=pyted_widget_search.label)
+                    lab.grid(row=var_row, column=1, sticky='W')
+                    self.var_labels.append(lab)
+        else:
+            self.attr_notebook.hide(self.pyted_window.var_use_tab_frame)
 
     # called when a row or column attribute entry box is changed
     def row_col_attr_entry_callback(self, _event, row_col, attr, entrybox):
