@@ -97,7 +97,7 @@ class Pyted:
         toolbox_row[tab] = 0
         toolbox_column[tab] = 2
         self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
-        ttk_label_button = ttk.Radiobutton(toolbox_frames[tab], text='pointer',
+        ttk_label_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
                                            variable=self.widget_in_toolbox_chosen_tk_var, value='pointer')
         ttk_label_button.invoke()
         ttk_label_button.bind("<Button-1>", self.toolbox_pointer_button_click)
@@ -127,8 +127,9 @@ class Pyted:
                     tab = None
                 if tab is not None:
                     try:
-                        new_button = ttk.Radiobutton(toolbox_frames[tab], text=obj.label,
-                                                     variable=self.widget_in_toolbox_chosen_tk_var, value=obj.label)
+                        new_button = tkinter.Radiobutton(toolbox_frames[tab], text=obj.label,
+                                                         variable=self.widget_in_toolbox_chosen_tk_var, value=obj.label,
+                                                         indicatoron=0)
                         try:
                             is_var = obj.is_var
                         except AttributeError:
