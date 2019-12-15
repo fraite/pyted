@@ -344,7 +344,7 @@ class StringVar(PytedWidget):
     set: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': VAR_SET_CODE, 'options': None})
 
     def generate_code(self):
-        code = f'self.{self.name} = tkinter.StringVar()\n'
+        code = f'self.{self.name} = tkinter.StringVar(root)\n'
         return code
 
 

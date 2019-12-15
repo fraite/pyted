@@ -98,7 +98,7 @@ class Pyted:
         toolbox_column[tab] = 2
         self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
         ttk_label_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
-                                           variable=self.widget_in_toolbox_chosen_tk_var, value='pointer')
+                                               variable=self.widget_in_toolbox_chosen_tk_var, value='pointer')
         ttk_label_button.invoke()
         ttk_label_button.bind("<Button-1>", self.toolbox_pointer_button_click)
         ttk_label_button.grid(column=0, row=0)
@@ -655,8 +655,6 @@ class Pyted:
 
         elif attr_template == pyted_widget_types.VAR_SET_CODE:
             setattr(pyte_widget, pyted_widget_types.VAR_SET_CODE, new_value)
-            # TODO: show widgets that use the variable with the variable value
-            # TODO: preview does not widgets with initial variable values, but run coded does...
 
         elif attr_template.startswith('<'):
             if init:
@@ -1039,7 +1037,8 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='col weight')
             lab.grid(row=4, column=0, sticky='W')
             self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(selected_pyte_widget).get_column_configuration(selected_pyte_widget.column)
+            col_config = self.find_pyte_parent(selected_pyte_widget).\
+                get_column_configuration(selected_pyte_widget.column)
             widget_attr = col_config['weight']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=4, column=1, sticky='NWES')
@@ -1057,7 +1056,8 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='col minsize')
             lab.grid(row=5, column=0, sticky='W')
             self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(selected_pyte_widget).get_column_configuration(selected_pyte_widget.column)
+            col_config = self.find_pyte_parent(selected_pyte_widget).\
+                get_column_configuration(selected_pyte_widget.column)
             widget_attr = col_config['minsize']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=5, column=1, sticky='NWES')
@@ -1075,7 +1075,8 @@ class Pyted:
             lab = tkinter.Label(self.row_col_frame, text='col pad')
             lab.grid(row=6, column=0, sticky='W')
             self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(selected_pyte_widget).get_column_configuration(selected_pyte_widget.column)
+            col_config = self.find_pyte_parent(selected_pyte_widget).\
+                get_column_configuration(selected_pyte_widget.column)
             widget_attr = col_config['pad']
             e = ttk.Entry(self.row_col_frame, takefocus=True)
             e.grid(row=6, column=1, sticky='NWES')
