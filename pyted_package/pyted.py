@@ -97,11 +97,11 @@ class Pyted:
         toolbox_row[tab] = 0
         toolbox_column[tab] = 2
         self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
-        ttk_label_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
-                                               variable=self.widget_in_toolbox_chosen_tk_var, value='pointer')
-        ttk_label_button.invoke()
-        ttk_label_button.bind("<Button-1>", self.toolbox_pointer_button_click)
-        ttk_label_button.grid(column=0, row=0)
+        self.pointer_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
+                                                  variable=self.widget_in_toolbox_chosen_tk_var, value='pointer')
+        self.pointer_button.invoke()
+        self.pointer_button.bind("<Button-1>", self.toolbox_pointer_button_click)
+        self.pointer_button.grid(column=0, row=0)
         # get all the other tabs
         for name, obj in inspect.getmembers(pyted_widget_types):
             if inspect.isclass(obj) and obj:
@@ -143,6 +143,10 @@ class Pyted:
                             new_button.bind("<Button-1>", lambda
                                             event, arg1=obj:
                                             self.toolbox_button_click_callback(event, arg1)
+                                            )
+                            new_button.bind("<Double-Button-1>", lambda
+                                            event, arg1=obj:
+                                            self.toolbox_button_double_click_callback(event, arg1)
                                             )
                         new_button.grid(column=toolbox_column[tab], row=toolbox_row[tab])
 
@@ -1308,13 +1312,23 @@ class Pyted:
             self.update_attr_frame()
 
     def escape_key_callback(self, _event):
-        pass
+        self.widget_in_toolbox_chosen = None
+        self.widget_in_toolbox_chosen_double_click = False
+        self.pointer_button.invoke()
+        if self.proposed_widget is not None and self.proposed_widget_location is not None:
+            self.new_filler_label(self.proposed_widget_frame.tk_name,
+                                  self.proposed_widget_location[0], self.proposed_widget_location[1])
+            self.proposed_widget.destroy()
+            self.proposed_widget_frame = None
+            self.proposed_widget_location = None
 
     def delete_key_callback(self, _event):
         if self.selected_widget is not None:
-            # check that focus is not in edit attributes, in which should not delete widget
+            # check that focus is not in edit attributes, in which case should not delete widget
             enable_delete = False
-            if self.root_window.focus_get() == self.root_window:
+            if isinstance(self.root_window.focus_get(), tkinter.Radiobutton):
+                enable_delete = True
+            if isinstance(self.root_window.focus_get(), ttk.Notebook):
                 enable_delete = True
             if isinstance(self.root_window.focus_get(), tkinter.ttk.Button):
                 print(self.root_window.focus_get().cget('text'))
@@ -1323,9 +1337,10 @@ class Pyted:
             if self.root_window.focus_get() == self.navigator_tree:
                 enable_delete = True
             if enable_delete:
-                self.delete_selected_widget()
-                self.selected_widget = None
-                self.update_attr_frame()
+                if not isinstance(self.selected_widget, pyted_widget_types.TopLevel):
+                    self.delete_selected_widget()
+                    self.selected_widget = None
+                    self.update_attr_frame()
 
     def delete_selected_widget(self):
         # print('delete widget at ', self.selected_widget.column, self.selected_widget.row)
@@ -1338,6 +1353,8 @@ class Pyted:
 
     # called when widget in navigation tree clicked
     def navigator_tree_clicked(self, _event):
+        self.widget_in_toolbox_chosen = None
+        self.pointer_button.invoke()
         pyte_widget = None
         for pyte_widget in self.widgets:
             if pyte_widget.name == self.navigator_tree.focus():
@@ -1366,7 +1383,14 @@ class Pyted:
     def toolbox_button_click_callback(self, _event, tk_widget_obj):
         self.deselect_selected_widget()
         self.widget_in_toolbox_chosen = tk_widget_obj
+        self.widget_in_toolbox_chosen_double_click = False
         # print(tk_widget_obj)
+
+    # called when button in toolbox clicked
+    def toolbox_button_double_click_callback(self, _event, tk_widget_obj):
+        self.deselect_selected_widget()
+        self.widget_in_toolbox_chosen = tk_widget_obj
+        self.widget_in_toolbox_chosen_double_click = True
 
     # called when var button in toolbox clicked
     def toolbox_var_button_click_callback(self, _event, tk_widget_obj):
@@ -1436,12 +1460,12 @@ class Pyted:
         self.proposed_widget = None
         self.build_navigator_tree()
         self.select_widget(new_widget)
-        # TODO: implement double_click
         if not self.widget_in_toolbox_chosen_double_click:
             self.widget_in_toolbox_chosen = None
             self.user_frame.after(30, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
-            # by return "break" we stop further event handling, which stops the inserted widget being active
-            return "break"
+        # by return "break" we stop further event handling, which stops the inserted widget being active
+        self.select_widget(new_widget)
+        return "break"
 
     def generate_unique_name(self, new_widget: pyted_widget_types) -> str:
         """
