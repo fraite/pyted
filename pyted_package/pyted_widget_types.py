@@ -192,6 +192,12 @@ class PytedContainerWidget(PytedWidget):
 
     """
 
+@dataclass()
+class PytedGridContainerWidget(PytedWidget):
+    """Parent class for pyted container widgets that use grid layout
+
+    """
+
     # instance attributes
     number_columns: int = field(default=2, metadata={'type': SINGLE_INPUT, 'template': GRID_SIZE_CODE, 'options': None})
     number_rows: int = field(default=2, metadata={'type': SINGLE_INPUT, 'template': GRID_SIZE_CODE, 'options': None})
@@ -349,7 +355,7 @@ class StringVar(PytedWidget):
 
 
 @dataclass()
-class TopLevel(PytedContainerWidget):
+class TopLevel(PytedGridContainerWidget):
     """Data for TopLevel widget
 
     This Dataclass holds information for a TopLevel widget instance. Attributes hold the information for the widget and
@@ -511,7 +517,7 @@ class Checkbutton(PytedPlacedWidget):
 # TTK Frame
 #
 @dataclass()
-class Frame(PytedContainerWidget, PytedPlacedWidget):
+class Frame(PytedGridContainerWidget, PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=tkinter.Frame, init=False)
@@ -580,8 +586,10 @@ class Notebook(PytedPlacedWidget):
     label: str = field(default='Notebook', init=False)
 
     # instance attributes
-    state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
-                                                         'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
+    # state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+    #                                                      'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
+    # height: str = field(default='75', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    # width: str = field(default='100', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Notebook(self.{self.parent})\n'

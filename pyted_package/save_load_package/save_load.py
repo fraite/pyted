@@ -124,7 +124,7 @@ def place_widgets(code, parent_widget_name, widgets):
             code = code + f'        # new_widget({pyte_widget.label})\n'
             code = code + f'        ' + pyte_widget.generate_code()
             # add rowconfigure and columnconfigure code for container widgets
-            if isinstance(pyte_widget, pyted_widget_types.PytedContainerWidget):
+            if isinstance(pyte_widget, pyted_widget_types.PytedGridContainerWidget):
                 for row, row_config in pyte_widget.get_row_configuration().items():
                     code = code + f'        self.{pyte_widget.name}.rowconfigure({row}'
                     for attr, v in row_config.items():
@@ -182,7 +182,7 @@ def place_widgets(code, parent_widget_name, widgets):
                         code = code + f'            self.{pyte_widget.name}.bind("{attr_template}", lambda\n' \
                                       f'                             event, arg1=self.{pyte_widget.name}:\n' \
                                       f'                             gui_binder.{event_method}(event, arg1))\n'
-            if isinstance(pyte_widget, pyted_widget_types.PytedContainerWidget) or\
+            if isinstance(pyte_widget, pyted_widget_types.PytedGridContainerWidget) or\
                     isinstance(pyte_widget, pyted_widget_types.Project):
                 code = place_widgets(code, pyte_widget.name, widgets)
     return code
