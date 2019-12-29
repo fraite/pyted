@@ -1,7 +1,7 @@
 import inspect
 import tkinter
 from tkinter import ttk
-from typing import List, Union, Optional
+from typing import Union
 from tkinter import filedialog, messagebox
 
 import pyted.pyted_widget_types as pyted_widget_types
@@ -30,7 +30,6 @@ class PytedCore:
         self.filler_labels = []
         self.widget_to_deselect_if_not_moved = None
         self.selected_widget = None
-        self.widget_toolbox: WidgetToolboxNotebook = WidgetToolboxNotebook(self)
         self.proposed_widget = None
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
@@ -49,7 +48,6 @@ class PytedCore:
         self.pyted_window = PytedWindow(self.root_window, self)
         self.background_user_frame = self.pyted_window.background_user_frame
         self.user_frame = self.pyted_window.user_frame
-        self.toolbox_notebook = self.pyted_window.toolbox_notebook
         # self.ttk_toolbox_frame = pyted_window.ttk_toolbox_frame
         self.navigator_tree = self.pyted_window.navigator_tree
 
@@ -58,79 +56,8 @@ class PytedCore:
 
         parent_pyte_widget = self.draw_user_frame()
 
-        # setup toolbox frames adding tabs. Done by looking to see all tabs used by widgets
-        toolbox_frames = {}
-        toolbox_row = {}
-        toolbox_column = {}
-        # force project to be the first tab by setting up StringVar Radiobutton
-        obj = pyted_widget_types.StringVar
-        tab = obj.tab
-        toolbox_frames[tab] = ttk.Frame(self.toolbox_notebook)
-        toolbox_row[tab] = 0
-        toolbox_column[tab] = 2
-        self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
-        self.pointer_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
-                                                  variable=self.widget_toolbox.widget_in_toolbox_chosen_tk_var,
-                                                  value='pointer')
-        self.pointer_button.invoke()
-        self.pointer_button.bind("<Button-1>", self.toolbox_pointer_button_click)
-        self.pointer_button.grid(column=0, row=0)
-        # get all the other tabs
-        for name, obj in inspect.getmembers(pyted_widget_types):
-            if inspect.isclass(obj) and obj:
-                try:
-                    tab = obj.tab
-                except AttributeError:
-                    tab = None
-                if tab is not None and tab not in toolbox_frames:
-                    toolbox_frames[tab] = ttk.Frame(self.toolbox_notebook)
-                    toolbox_row[tab] = 0
-                    toolbox_column[tab] = 0
-                    self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
-                    # ttk_label_button = ttk.Button(toolbox_frames[tab], text='pointer')
-                    # ttk_label_button.bind("<Button-1>", self.toolbox_pointer_button_click)
-                    # ttk_label_button.grid(column=0, row=0)
+        self.widget_toolbox: WidgetToolboxNotebook = WidgetToolboxNotebook(self)
 
-        # set up inside of Toolbox Frame with a Radiobutton for each widget type
-        for name, obj in inspect.getmembers(pyted_widget_types):
-            if inspect.isclass(obj) and obj:
-                try:
-                    tab = obj.tab
-                except AttributeError:
-                    tab = None
-                if tab is not None:
-                    try:
-                        new_button = tkinter.Radiobutton(toolbox_frames[tab], text=obj.label,
-                                                         variable=self.widget_toolbox.widget_in_toolbox_chosen_tk_var,
-                                                         value=obj.label,
-                                                         indicatoron=0)
-                        try:
-                            is_var = obj.is_var
-                        except AttributeError:
-                            is_var = False
-                        if is_var:
-                            new_button.bind("<Button-1>", lambda
-                                            event, arg1=obj:
-                                            self.toolbox_var_button_click_callback(event, arg1)
-                                            )
-                        else:
-                            new_button.bind("<Button-1>", lambda
-                                            event, arg1=obj:
-                                            self.toolbox_button_click_callback(event, arg1)
-                                            )
-                            new_button.bind("<Double-Button-1>", lambda
-                                            event, arg1=obj:
-                                            self.toolbox_button_double_click_callback(event, arg1)
-                                            )
-                        new_button.grid(column=toolbox_column[tab], row=toolbox_row[tab])
-
-                        toolbox_column[tab] = toolbox_column[tab] + 2
-                        if toolbox_column[tab] >= 8:
-                            toolbox_row[tab] = toolbox_row[tab] + 2
-                            toolbox_column[tab] = toolbox_column[tab] - 8
-
-                    except AttributeError:
-                        pass
 
         self.build_navigator_tree()
         self.select_widget(parent_pyte_widget)
@@ -528,7 +455,7 @@ class PytedCore:
             else:
 
                 filler_widget = self.widgets.find_tk_parent(pyte_widget).grid_slaves(row=new_position['row'],
-                                                                             column=new_position['column'])[0]
+                                                                                     column=new_position['column'])[0]
                 if filler_widget not in self.filler_labels and filler_widget != pyte_widget.tk_name:
                     # trying to move widget onto existing widget
                     pyte_widget.remove = True
@@ -971,7 +898,7 @@ class PytedCore:
     def escape_key_callback(self, _event):
         self.widget_toolbox.widget_in_toolbox_chosen = None
         self.widget_toolbox.widget_in_toolbox_chosen_double_click = False
-        self.pointer_button.invoke()
+        self.widget_toolbox.pointer_button.invoke()
         if self.proposed_widget is not None and self.proposed_widget_location is not None:
             self.new_filler_label(self.proposed_widget_frame.tk_name,
                                   self.proposed_widget_location[0], self.proposed_widget_location[1])
@@ -1012,47 +939,12 @@ class PytedCore:
     # called when widget in navigation tree clicked
     def navigator_tree_clicked(self, _event):
         self.widget_toolbox.widget_in_toolbox_chosen = None
-        self.pointer_button.invoke()
+        self.widget_toolbox.pointer_button.invoke()
         pyte_widget = None
         for pyte_widget in self.widgets.widget_list:
             if pyte_widget.name == self.navigator_tree.focus():
                 break
         self.select_widget(pyte_widget)
-
-    # called when button in toolbox clicked
-    def toolbox_button_click_callback(self, _event, tk_widget_obj):
-        self.deselect_selected_widget()
-        self.widget_toolbox.widget_in_toolbox_chosen = tk_widget_obj
-        self.widget_toolbox.widget_in_toolbox_chosen_double_click = False
-        # print(tk_widget_obj)
-
-    # called when button in toolbox clicked
-    def toolbox_button_double_click_callback(self, _event, tk_widget_obj):
-        self.deselect_selected_widget()
-        self.widget_toolbox.widget_in_toolbox_chosen = tk_widget_obj
-        self.widget_toolbox.widget_in_toolbox_chosen_double_click = True
-
-    # called when var button in toolbox clicked
-    def toolbox_var_button_click_callback(self, _event, tk_widget_obj):
-        new_widget = tk_widget_obj()
-        new_widget.name = self.generate_unique_name(new_widget)
-        new_widget.parent = self.widgets.widget_list[0].name
-
-        self.widgets.widget_list.append(new_widget)
-        self.selected_widget = new_widget
-        self.build_navigator_tree()
-        self.attr_frame.update(self.selected_widget)
-        self.handles.remove_selected_widget_handles()
-        # print(len(self.widgets))
-        # self.deselect_selected_widget()
-        self.widget_toolbox.widget_in_toolbox_chosen = None
-        self.user_frame.after(300, lambda: self.widget_toolbox.widget_in_toolbox_chosen_tk_var.set('pointer'))
-
-    # called when pointer button clicked in toolbox
-    def toolbox_pointer_button_click(self, _event):
-        self.widget_toolbox.widget_in_toolbox_chosen = None
-        # print('toolbox pointer button clicked', event.x, event.y)
-        # self.deselect_selected_widget()
 
     def user_frame_leave_callback(self, _event):
         if self.proposed_widget is not None and self.proposed_widget_location is not None:

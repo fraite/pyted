@@ -5,7 +5,7 @@ from typing import List, Union
 
 import pyted.pyted_widget_types as pyted_widget_types
 
-import pyted.pyted_code.pyted_core as pyted_core
+import pyted.pyted_code.pyted_core as pyted_core_module
 import pyted.pyted_code.widgets as widgets
 import pyted.pyted_code.widget_handles as widget_handles
 
@@ -18,8 +18,8 @@ class AttributeFrame:
     and column attributes of the parent.
     """
 
-    def __init__(self, pyted_core: pyted_core):
-        self.pyted_core: pyted_core = pyted_core
+    def __init__(self, pyted_core: pyted_core_module):
+        self.pyted_core: pyted_core_module = pyted_core
         self.handles: widget_handles = pyted_core.handles
         self.pyted_window = pyted_core.pyted_window
         self.widgets: widgets.Widgets = pyted_core.widgets
@@ -330,7 +330,8 @@ class AttributeFrame:
             return_value = self.pyted_core.update_widget_attribute(selected_widget,
                                                                    attrib, entrybox.get())
             # self.update_attr_frame()
-            self.handles.place_selected_widget_handles(selected_widget.tk_name)
+            if selected_widget.tk_name is not None:
+                self.handles.place_selected_widget_handles(selected_widget.tk_name)
             if return_value is not None:
                 messagebox.showwarning('Renaming problem',
                                        'Name already exists for another widget and Name not changed')
