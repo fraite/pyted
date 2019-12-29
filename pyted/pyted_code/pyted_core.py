@@ -4,9 +4,13 @@ from tkinter import ttk
 from typing import List, Union, Optional
 from tkinter import filedialog, messagebox
 
-import pyted_package.pyted_widget_types as pyted_widget_types
-import pyted_package.save_load_package.save_load as save_load
-from pyted_package.pyted_window import PytedWindow
+import pyted.pyted_widget_types as pyted_widget_types
+import pyted.save_load_package.save_load as save_load
+from pyted.pyted_code.widgets import Widgets
+from pyted.pyted_window import PytedWindow
+from pyted.pyted_code.widget_handles import Handles
+from pyted.pyted_code.widget_attribute_frame import AttributeFrame
+from pyted.pyted_code.widget_toolbox_notebook import WidgetToolboxNotebook
 
 FILLER_TEXT = '        .        '
 Pyted_Widget_Type = Union[pyted_widget_types.Project, pyted_widget_types.StringVar,
@@ -16,10 +20,8 @@ Pyted_Widget_Type = Union[pyted_widget_types.Project, pyted_widget_types.StringV
 Pyted_Container_Type = Union[pyted_widget_types.TopLevel, pyted_widget_types.Frame]
 
 
-class Pyted:
+class PytedCore:
     """A tkinter GUI Editor"""
-    selected_widget: Optional[Pyted_Widget_Type]
-    widgets: List[Pyted_Widget_Type]
 
     def __init__(self):
 
@@ -28,9 +30,7 @@ class Pyted:
         self.filler_labels = []
         self.widget_to_deselect_if_not_moved = None
         self.selected_widget = None
-        self.widget_in_toolbox_chosen = None
-        self.widget_in_toolbox_chosen_tk_var = tkinter.StringVar()
-        self.widget_in_toolbox_chosen_double_click = False
+        self.widget_toolbox: WidgetToolboxNotebook = WidgetToolboxNotebook(self)
         self.proposed_widget = None
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
@@ -38,54 +38,25 @@ class Pyted:
         self.selection_frame = None
         self.mouse_button1_pressed = False
         self.attr_input_method = tkinter.Entry
-        self.attr_labels: List[tkinter.Widget] = []
-        self.attr_widgets: List[tkinter.Widget] = []
-        self.var_labels: List[tkinter.Widget] = []
-        self.var_widgets: List[tkinter.Widget] = []
 
         # set up test user form
         #
-        self.widgets = []
-        # Project widget
-        # widget = pyted_widgets.Label()
-        widget = pyted_widget_types.Project()
-        widget.name = 'GuiCollection'
-        widget.comment = 'a test GUI'
-        self.widgets.append(widget)
-        # Top level window
-        widget = pyted_widget_types.TopLevel()
-        widget.name = 'gui_1'
-        widget.comment = 'A demo window'
-        widget.window_title = 'My demo window'
-        widget.number_columns = '4'
-        widget.number_rows = '4'
-        widget.padx = '5'
-        widget.pady = '5'
-        self.widgets.append(widget)
+        # TODO: change references self.widget
+        self.widgets = Widgets()
+        # self.widgets.widget_list = self.widgets.widget_list
 
         # set up window
-        pyted_window = PytedWindow(self.root_window, self)
-        self.background_user_frame = pyted_window.background_user_frame
-        self.user_frame = pyted_window.user_frame
-        self.toolbox_notebook = pyted_window.toolbox_notebook
+        self.pyted_window = PytedWindow(self.root_window, self)
+        self.background_user_frame = self.pyted_window.background_user_frame
+        self.user_frame = self.pyted_window.user_frame
+        self.toolbox_notebook = self.pyted_window.toolbox_notebook
         # self.ttk_toolbox_frame = pyted_window.ttk_toolbox_frame
-        self.navigator_tree = pyted_window.navigator_tree
-        self.attr_frame = pyted_window.attribute_frame2
-        self.event_frame = pyted_window.event_frame2
-        self.row_col_frame = pyted_window.row_col_frame2
-        self.var_use_frame = pyted_window.var_use_frame2
-        self.attr_notebook = pyted_window.attribute_event_note2
-        self.pyted_window = pyted_window
+        self.navigator_tree = self.pyted_window.navigator_tree
+
+        self.handles = Handles(self.root_window)
+        self.attr_frame = AttributeFrame(self)
 
         parent_pyte_widget = self.draw_user_frame()
-
-        # Create handles
-        #
-        self.handle_NW_canvas = tkinter.Canvas(self.root_window, background='red', width=5, height=5)
-        self.handle_NE_canvas = tkinter.Canvas(self.root_window, background='red', width=5, height=5)
-        self.handle_SW_canvas = tkinter.Canvas(self.root_window, background='red', width=5, height=5)
-        self.handle_SE_canvas = tkinter.Canvas(self.root_window, background='red', width=5, height=5)
-        # self.NW_canvas.place(x=500, y=30)
 
         # setup toolbox frames adding tabs. Done by looking to see all tabs used by widgets
         toolbox_frames = {}
@@ -99,7 +70,8 @@ class Pyted:
         toolbox_column[tab] = 2
         self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
         self.pointer_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
-                                                  variable=self.widget_in_toolbox_chosen_tk_var, value='pointer')
+                                                  variable=self.widget_toolbox.widget_in_toolbox_chosen_tk_var,
+                                                  value='pointer')
         self.pointer_button.invoke()
         self.pointer_button.bind("<Button-1>", self.toolbox_pointer_button_click)
         self.pointer_button.grid(column=0, row=0)
@@ -129,7 +101,8 @@ class Pyted:
                 if tab is not None:
                     try:
                         new_button = tkinter.Radiobutton(toolbox_frames[tab], text=obj.label,
-                                                         variable=self.widget_in_toolbox_chosen_tk_var, value=obj.label,
+                                                         variable=self.widget_toolbox.widget_in_toolbox_chosen_tk_var,
+                                                         value=obj.label,
                                                          indicatoron=0)
                         try:
                             is_var = obj.is_var
@@ -162,7 +135,7 @@ class Pyted:
         self.build_navigator_tree()
         self.select_widget(parent_pyte_widget)
         self.draw_user_frame()
-        self.place_selected_widget_handles(self.user_frame)
+        self.handles.place_selected_widget_handles(self.user_frame)
 
         self.root_window.mainloop()
         # self.toolbox = None
@@ -172,7 +145,7 @@ class Pyted:
         #
 
         # Find top level widget, assign tk_name to user_frame, and get name
-        pyte_widget = self.find_top_widget()
+        pyte_widget = self.widgets.find_top_widget()
         if self.user_frame is not None:
             self.user_frame.destroy()
         self.user_frame = ttk.Frame(self.background_user_frame)
@@ -188,15 +161,6 @@ class Pyted:
         self.fill_tk_container_widget(pyte_widget)
 
         return pyte_widget
-
-    def find_top_widget(self):
-        for pyte_widget in self.widgets:
-            try:
-                if pyte_widget.type == tkinter.Toplevel:
-                    return pyte_widget
-            except AttributeError:
-                pass
-        raise Exception('No TopLevel widget defined in project')
 
     def new_filler_label(self, container: tkinter.Widget, column: int, row: int) -> None:
         """
@@ -215,42 +179,11 @@ class Pyted:
         new_label.bind("<Motion>", self.user_motion_callback)
         # new_label.bind("<Button-1>", self.empty_label_click_callback)
         new_label.bind("<Button-1>", lambda
-                       event, arg1=self.find_pyte_widget_from_tk(container):
+                       event, arg1=self.widgets.find_pyte_widget_from_tk(container):
                        self.widget_click(event, arg1)
                        )
         new_label.bind("<ButtonRelease-1>", self.widget_release)
         self.filler_labels.append(new_label)
-
-    def find_pyte_parent(self, pyte_widget: pyted_widget_types) -> pyted_widget_types:
-        """
-        Find the pyte_widget that is the parent of a pyte_widget
-
-        :param pyte_widget: the pyte widget
-        :return: the pyte_widget parent
-        """
-        for w in self.widgets:
-            if w.name == pyte_widget.parent:
-                parent_widget = w
-                break
-        else:
-            parent_widget = None
-        return parent_widget
-
-    def find_tk_parent(self, pyte_widget: pyted_widget_types) -> tkinter.Widget:
-        """
-        Find the tk_widget that is the parent of a pyte_widget
-
-        :param pyte_widget: the pyte widget
-        :return: the tk_widget parent
-        """
-
-        for w in self.widgets:
-            if w.name == pyte_widget.parent:
-                parent_tk_widget = w.tk_name
-                break
-        else:
-            parent_tk_widget = None
-        return parent_tk_widget
 
     def place_pyte_widget(self, pyte_widget: Pyted_Widget_Type, tk_frame=None, column=None, row=None) -> tkinter.Widget:
         """
@@ -273,7 +206,7 @@ class Pyted:
 
         # work out parent_tk_frame
         if tk_frame is None:
-            parent_tk_widget = self.find_tk_parent(pyte_widget)
+            parent_tk_widget = self.widgets.find_tk_parent(pyte_widget)
         else:
             parent_tk_widget = tk_frame
         if parent_tk_widget is None:
@@ -316,7 +249,7 @@ class Pyted:
         :return:
         """
         if tk_parent is None:
-            parent_id = self.find_tk_parent(pyte_widget)
+            parent_id = self.widgets.find_tk_parent(pyte_widget)
         else:
             parent_id = tk_parent
         if parent_id is None:
@@ -345,7 +278,7 @@ class Pyted:
             tk_new_widget.bind("<ButtonRelease-1>", self.widget_release)
         return tk_new_widget
 
-    def fill_tk_container_widget(self, parent_pyte_widget: Pyted_Widget_Type) -> None:
+    def fill_tk_container_widget(self, parent_pyte_widget: pyted_widget_types.PytedGridContainerWidget) -> None:
         """
         Fill a tk container widget
 
@@ -361,7 +294,7 @@ class Pyted:
             for i_row in range(int(parent_pyte_widget.number_rows)):
                 self.new_filler_label(parent_pyte_widget.tk_name, i_col, i_row)
 
-        for pyte_widget in self.widgets:
+        for pyte_widget in self.widgets.widget_list:
             if pyte_widget.parent == parent_pyte_widget.name:
                 if (int(pyte_widget.column) >= int(parent_pyte_widget.number_columns) or
                         int(pyte_widget.row) >= int(parent_pyte_widget.number_rows)):
@@ -372,7 +305,7 @@ class Pyted:
                 else:
                     self.place_pyte_widget(pyte_widget)
 
-    def empty_tk_container_widget(self, parent_pyte_widget: Pyted_Widget_Type) -> None:
+    def empty_tk_container_widget(self, parent_pyte_widget: pyted_widget_types.PytedGridContainerWidget) -> None:
         """
         Empty a tk container widget
 
@@ -406,14 +339,14 @@ class Pyted:
         :param event: the tkinter event object
         :return: None
         """
-        if self.widget_in_toolbox_chosen is None:
+        if self.widget_toolbox.widget_in_toolbox_chosen is None:
             # print('<<<<', self.selected_widget.name, self.mouse_button1_pressed)
             if self.selected_widget is not None and self.mouse_button1_pressed:
                 # selection widget chosen so may need to move widget
                 self.widget_move(event)
         else:
             # toolbox widget chosen so may need to insert proposed widget into user_frame
-            frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
+            frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
             # if self.proposed_widget_frame is not None:
             #     print('user motion-toolbox chosen', 'mouse location:', frame.name, grid_location,
             #           'proposed_widget_location', self.proposed_widget_frame.name, self.proposed_widget_location)
@@ -428,11 +361,11 @@ class Pyted:
             # insert new frame into a notebook?
             if isinstance(frame, pyted_widget_types.Notebook) and isinstance(self.proposed_widget, tkinter.Frame):
                 if self.proposed_widget_frame != frame:
-                    self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name)
+                    self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name)
                     self.proposed_widget_frame = frame
                     self.proposed_widget_location = [0, 0]
-                    number_columns = self.widget_in_toolbox_chosen.number_columns
-                    number_rows = self.widget_in_toolbox_chosen.number_rows
+                    number_columns = self.widget_toolbox.widget_in_toolbox_chosen.number_columns
+                    number_rows = self.widget_toolbox.widget_in_toolbox_chosen.number_rows
                     self.proposed_widget['borderwidth'] = 2
                     self.proposed_widget['relief'] = tkinter.GROOVE
                     # tk_widget[attr] = getattr(pyte_widget, attr)
@@ -445,7 +378,7 @@ class Pyted:
                             new_label.bind("<Button-1>", self.inserted_widget_click)
                             # new_label.bind("<ButtonRelease-1>", self.widget_release)
                             self.filler_labels.append(new_label)
-                    #self.proposed_widget.grid(column=grid_location[0], row=grid_location[1])
+                    # self.proposed_widget.grid(column=grid_location[0], row=grid_location[1])
                     frame.tk_name.add(self.proposed_widget)
                     frame.tk_name.select(self.proposed_widget)
                     self.proposed_widget.bind('<Motion>', self.user_motion_callback)
@@ -466,10 +399,10 @@ class Pyted:
                     if widget_under_mouse in self.filler_labels:
                         self.proposed_widget_frame = frame
                         self.proposed_widget_location = grid_location
-                        if self.widget_in_toolbox_chosen is pyted_widget_types.Frame:
-                            self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name)
-                            number_columns = self.widget_in_toolbox_chosen.number_columns
-                            number_rows = self.widget_in_toolbox_chosen.number_rows
+                        if self.widget_toolbox.widget_in_toolbox_chosen is pyted_widget_types.Frame:
+                            self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name)
+                            number_columns = self.widget_toolbox.widget_in_toolbox_chosen.number_columns
+                            number_rows = self.widget_toolbox.widget_in_toolbox_chosen.number_rows
                             self.proposed_widget['borderwidth'] = 2
                             self.proposed_widget['relief'] = tkinter.GROOVE
                             # tk_widget[attr] = getattr(pyte_widget, attr)
@@ -482,8 +415,8 @@ class Pyted:
                                     new_label.bind("<Button-1>", self.inserted_widget_click)
                                     # new_label.bind("<ButtonRelease-1>", self.widget_release)
                                     self.filler_labels.append(new_label)
-                        elif self.widget_in_toolbox_chosen is pyted_widget_types.Notebook:
-                            self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name)
+                        elif self.widget_toolbox.widget_in_toolbox_chosen is pyted_widget_types.Notebook:
+                            self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name)
                             # self.proposed_widget['height'] = 75
                             # self.proposed_widget['width'] = 100
                             self.proposed_widget_tab = tkinter.Frame(self.proposed_widget)
@@ -502,16 +435,17 @@ class Pyted:
                                     # new_label.bind("<ButtonRelease-1>", self.widget_release)
                                     self.filler_labels.append(new_label)
                             self.proposed_widget.add(self.proposed_widget_tab, text='tab 1')
-                        elif hasattr(self.widget_in_toolbox_chosen, 'text'):
-                            text = self.generate_unique_name(self.widget_in_toolbox_chosen)
-                            if hasattr(self.widget_in_toolbox_chosen, 'value'):
-                                self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name,
-                                                                                          text=text, value=text)
+                        elif hasattr(self.widget_toolbox.widget_in_toolbox_chosen, 'text'):
+                            text = self.generate_unique_name(self.widget_toolbox.widget_in_toolbox_chosen)
+                            if hasattr(self.widget_toolbox.widget_in_toolbox_chosen, 'value'):
+                                self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name,
+                                                                                                         text=text,
+                                                                                                         value=text)
                             else:
-                                self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name,
-                                                                                          text=text)
+                                self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name,
+                                                                                                         text=text)
                         else:
-                            self.proposed_widget = self.widget_in_toolbox_chosen.type(frame.tk_name)
+                            self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name)
 
                         self.proposed_widget.grid(column=grid_location[0], row=grid_location[1])
                         self.proposed_widget.bind('<Motion>', self.user_motion_callback)
@@ -528,6 +462,7 @@ class Pyted:
                     self.new_filler_label(old_proposed_widget_frame.tk_name,
                                           old_proposed_widget_location[0], old_proposed_widget_location[1])
 
+    # TODO: move this to sub packet to allow widget_attribute_frame package not to refer to pyted_core
     def update_widget_attribute(self, pyte_widget: Pyted_Widget_Type, attr: str, new_value: Union[str, bool],
                                 init=False) -> Union[None, tuple]:
         """Update a widget attribute with a new value
@@ -578,28 +513,28 @@ class Pyted:
                 return
             new_attr_val = getattr(pyte_widget, attr)
             new_position[attr] = new_attr_val
-            if (int(new_position['row']) >= int(self.find_pyte_widget(pyte_widget.parent).number_rows) or
-                    int(new_position['column']) >= int(self.find_pyte_widget(pyte_widget.parent).number_columns)):
+            if (int(new_position['row']) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_rows) or
+                    int(new_position['column']) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_columns)):
                 # pyte_widget.row = old_position['row']
                 # pyte_widget.column = old_position['column']
                 pyte_widget.remove = True
                 pyte_widget.tk_name.grid_remove()
-                self.remove_selected_widget_handles()
-                self.new_filler_label(self.find_tk_parent(pyte_widget),
+                self.handles.remove_selected_widget_handles()
+                self.new_filler_label(self.widgets.find_tk_parent(pyte_widget),
                                       old_position['column'], old_position['row'])
                 messagebox.showwarning('Widget being moved off grid',
                                        'Row or column greater than grid size. Widget has been removed. '
                                        'To get widget back move back onto grid and set remove to false')
             else:
 
-                filler_widget = self.find_tk_parent(pyte_widget).grid_slaves(row=new_position['row'],
+                filler_widget = self.widgets.find_tk_parent(pyte_widget).grid_slaves(row=new_position['row'],
                                                                              column=new_position['column'])[0]
                 if filler_widget not in self.filler_labels and filler_widget != pyte_widget.tk_name:
                     # trying to move widget onto existing widget
                     pyte_widget.remove = True
                     pyte_widget.tk_name.grid_remove()
-                    self.remove_selected_widget_handles()
-                    self.new_filler_label(self.find_tk_parent(pyte_widget),
+                    self.handles.remove_selected_widget_handles()
+                    self.new_filler_label(self.widgets.find_tk_parent(pyte_widget),
                                           old_position['column'], old_position['row'])
                     messagebox.showwarning('Widget being moved onto existing widget',
                                            'Row and column the same as another widget. Widget has been removed. '
@@ -607,7 +542,7 @@ class Pyted:
                     return
                 filler_widget.grid(row=old_position['row'], column=old_position['column'])
                 tk_widget.grid({attr: new_attr_val})
-                self.place_selected_widget_handles(pyte_widget.tk_name)
+                self.handles.place_selected_widget_handles(pyte_widget.tk_name)
 
         elif attr_template == pyted_widget_types.GRID_SIZE_CODE:
             if init:
@@ -616,7 +551,7 @@ class Pyted:
             # self.empty_tk_container_widget(pyte_widget)
             self.empty_tk_container_widget(pyte_widget)
             self.fill_tk_container_widget(pyte_widget)
-            self.place_selected_widget_handles(pyte_widget.tk_name)
+            self.handles.place_selected_widget_handles(pyte_widget.tk_name)
 
         elif attr_template == pyted_widget_types.ROW_CONFIGURE or attr_template == pyted_widget_types.COLUMN_CONFIGURE:
             # row and column configuration handled elsewhere in program
@@ -631,24 +566,24 @@ class Pyted:
             if getattr(pyte_widget, 'remove'):
                 if tk_widget_in_grid:
                     widget_to_hide = pyte_widget
-                    self.new_filler_label(self.find_tk_parent(widget_to_hide), widget_to_hide.column,
+                    self.new_filler_label(self.widgets.find_tk_parent(widget_to_hide), widget_to_hide.column,
                                           widget_to_hide.row)
                     widget_to_hide.tk_name.grid_remove()
-                    self.remove_selected_widget_handles()
+                    self.handles.remove_selected_widget_handles()
             else:
                 # remove attribute is false, if widget not displayed then try to display it
                 if not tk_widget_in_grid:
                     # check that the widget is on the grid
-                    if (int(pyte_widget.row) >= int(self.find_pyte_widget(pyte_widget.parent).number_rows) or
-                            int(pyte_widget.column) >= int(self.find_pyte_widget(pyte_widget.parent).number_columns)):
+                    if (int(pyte_widget.row) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_rows) or
+                            int(pyte_widget.column) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_columns)):
                         messagebox.showwarning('Widget off grid',
                                                'Row or column greater than grid size. '
                                                'To get widget back move back onto grid and set remove to false')
                         setattr(pyte_widget, 'remove', True)
                         return
                     # check that there is not a widget already visible
-                    filler_widget = self.find_tk_parent(pyte_widget).grid_slaves(row=pyte_widget.row,
-                                                                                 column=pyte_widget.column)[0]
+                    filler_widget = self.widgets.find_tk_parent(pyte_widget).grid_slaves(row=pyte_widget.row,
+                                                                                         column=pyte_widget.column)[0]
                     if filler_widget not in self.filler_labels:
                         pyte_widget.remove = True
                         pyte_widget.tk_name.grid_remove()
@@ -658,12 +593,12 @@ class Pyted:
                                                'To get widget back move onto empty slot and set remove to false')
                         return
                     # remove filler label and show user widget
-                    filler_widget = self.find_tk_parent(pyte_widget).grid_slaves(row=pyte_widget.row,
-                                                                                 column=pyte_widget.column)[0]
+                    filler_widget = self.widgets.find_tk_parent(pyte_widget).grid_slaves(row=pyte_widget.row,
+                                                                                         column=pyte_widget.column)[0]
                     filler_widget.grid_forget()
                     filler_widget.destroy()
                     pyte_widget.tk_name.grid(row=pyte_widget.row, column=pyte_widget.column)
-                    self.place_selected_widget_handles(pyte_widget.tk_name)
+                    self.handles.place_selected_widget_handles(pyte_widget.tk_name)
 
         elif attr_template == pyted_widget_types.BESPOKE_CODE and attr == 'name':
             if init:
@@ -673,7 +608,7 @@ class Pyted:
             if new_value == old_value:
                 return
             # check name is not already taken
-            for i_pyte_widget in self.widgets:
+            for i_pyte_widget in self.widgets.widget_list:
                 if i_pyte_widget != pyte_widget:
                     if pyte_widget.name == i_pyte_widget.name:
                         # can't messagebox here as this would move focus out of entry box and cause binding to run again
@@ -681,7 +616,7 @@ class Pyted:
                         #                        'Name already exists for another widget and Name not changed')
                         setattr(pyte_widget, attr, old_value)
                         return 'Renaming problem', 'Name already exists for another widget and Name not changed'
-            for i_pyte_widget in self.widgets:
+            for i_pyte_widget in self.widgets.widget_list:
                 if i_pyte_widget.parent == old_value:
                     i_pyte_widget.parent = new_value
             # self.update_navigator_tree()
@@ -722,7 +657,7 @@ class Pyted:
 
     def get_pyte_widget(self, tk_widget):
         """Get pyte widget that has tk_widget in the user form"""
-        for pyte_widget in self.widgets:
+        for pyte_widget in self.widgets.widget_list:
             if pyte_widget.label != 'Project':
                 if tk_widget == pyte_widget.tk_name:
                     return pyte_widget
@@ -731,7 +666,7 @@ class Pyted:
     # called when a widget clicked using pointer
     def widget_click(self, _event, pyte_widget):
         self.mouse_button1_pressed = True
-        if self.widget_in_toolbox_chosen is None:
+        if self.widget_toolbox.widget_in_toolbox_chosen is None:
             # frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
             # print('-->', frame.name, grid_location, pyte_widget.name, pyte_widget.parent)
             # self.selected_current_frame = frame
@@ -745,9 +680,10 @@ class Pyted:
                 # may need to deselect widget if mouse not moved
                 self.widget_to_deselect_if_not_moved = pyte_widget
             return "break"
-        elif (self.widget_in_toolbox_chosen is pyted_widget_types.Frame and
+        elif (self.widget_toolbox.widget_in_toolbox_chosen is pyted_widget_types.Frame and
               isinstance(pyte_widget, pyted_widget_types.Notebook)):
-            self.insert_widget(self.widget_in_toolbox_chosen(), self.proposed_widget, self.proposed_widget_frame,
+            self.insert_widget(self.widget_toolbox.widget_in_toolbox_chosen(), self.proposed_widget,
+                               self.proposed_widget_frame,
                                [0, 0])
 
     # called when a (not filler) widget released using pointer
@@ -765,13 +701,13 @@ class Pyted:
 
     def widget_move(self, event):
         # called when a (not filler) widget in user form is attempted to be moved
-        if self.widget_in_toolbox_chosen is None and self.selected_widget is not None:
+        if self.widget_toolbox.widget_in_toolbox_chosen is None and self.selected_widget is not None:
             # mouse pointer mode chosen from widget toolbox
             self.widget_to_deselect_if_not_moved = None
             # x_location = event.x_root - self.user_frame.winfo_rootx()
             # y_location = event.y_root - self.user_frame.winfo_rooty()
             # grid_location = self.user_frame.grid_location(x_location, y_location)
-            frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
+            frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
             if self.selected_widget.type == tkinter.Toplevel:
                 selected_widget_current_row = None
                 selected_widget_current_column = None
@@ -779,7 +715,7 @@ class Pyted:
             else:
                 selected_widget_current_row = self.selected_widget.row
                 selected_widget_current_column = self.selected_widget.column
-                selected_widget_current_frame = self.find_pyte_parent(self.selected_widget)
+                selected_widget_current_frame = self.widgets.find_pyte_parent(self.selected_widget)
             if (selected_widget_current_column == grid_location[0] and
                 selected_widget_current_row == grid_location[1] and
                     selected_widget_current_frame == frame):
@@ -799,13 +735,13 @@ class Pyted:
                 widget_under_mouse = None
             elif frame.type != tkinter.Toplevel:
                 # check that selected frame is not parent of the frame that we are moving into
-                pyte_parent = self.find_pyte_parent(frame)
+                pyte_parent = self.widgets.find_pyte_parent(frame)
                 while pyte_parent.type != tkinter.Toplevel:
                     if pyte_parent == self.selected_widget:
                         # trying to move a container into it's child
                         widget_under_mouse = None
                         break
-                    pyte_parent = self.find_pyte_parent(pyte_parent)
+                    pyte_parent = self.widgets.find_pyte_parent(pyte_parent)
 
             if widget_under_mouse in self.filler_labels:
                 # print('widget move ', frame.name, grid_location)
@@ -836,8 +772,8 @@ class Pyted:
                 self.selected_widget.parent = frame.name
                 self.selected_widget.column = grid_location[0]
                 self.selected_widget.row = grid_location[1]
-                self.update_attr_frame()
-                self.place_selected_widget_handles(clone)
+                self.attr_frame.update(self.selected_widget)
+                self.handles.place_selected_widget_handles(clone)
                 if widget_changed_frame:
                     self.build_navigator_tree()
                 # print('end move widget')
@@ -862,369 +798,18 @@ class Pyted:
                 if remove:
                     remove_or_parent_remove = True
                     break
-                widget_to_check = self.find_pyte_widget(widget_to_check.parent)
+                widget_to_check = self.widgets.find_pyte_widget(widget_to_check.parent)
 
         if remove_or_parent_remove:
-            self.remove_selected_widget_handles()
+            self.handles.remove_selected_widget_handles()
         else:
-            self.place_selected_widget_handles(self.selected_widget.tk_name)
+            self.handles.place_selected_widget_handles(self.selected_widget.tk_name)
 
         # fill out attribute tree, and attribute entry box
 
-        self.update_attr_frame()
+        self.attr_frame.update(self.selected_widget)
         # self.update_navigator_tree()
         self.navigator_tree_select_item()
-
-    def find_pyte_widget(self, name):
-        for pyte_widget in self.widgets:
-            if pyte_widget.name == name:
-                return pyte_widget
-        raise Exception(f'pyte widget with name {name} can not be found')
-
-    def find_pyte_widget_from_tk(self, tk_name):
-        for pyte_widget in self.widgets:
-            try:
-                if pyte_widget.tk_name == tk_name:
-                    return pyte_widget
-            except AttributeError:
-                pass
-        raise Exception(f'pyte widget with tk_name {tk_name} can not be found')
-
-    def place_selected_widget_handles(self, tk_widget: tkinter.Widget) -> None:
-        """Put handles around the selected widget
-
-        Places four canvas objects at each corner of the self.selected_widget object.
-        """
-        tk_widget.update_idletasks()
-        root_x = self.root_window.winfo_rootx()
-        root_y = self.root_window.winfo_rooty()
-        widget_x1 = tk_widget.winfo_rootx()
-        widget_y1 = tk_widget.winfo_rooty()
-        widget_x2 = widget_x1 + tk_widget.winfo_width()
-        widget_y2 = widget_y1 + tk_widget.winfo_height()
-        self.handle_NW_canvas.place(x=(widget_x1 - root_x - 4), y=(widget_y1 - root_y - 4))
-        self.handle_NE_canvas.place(x=(widget_x2 - root_x - 4), y=(widget_y1 - root_y - 4))
-        self.handle_SW_canvas.place(x=(widget_x1 - root_x - 4), y=(widget_y2 - root_y - 4))
-        self.handle_SE_canvas.place(x=(widget_x2 - root_x - 4), y=(widget_y2 - root_y - 4))
-
-    def remove_selected_widget_handles(self):
-        self.handle_NW_canvas.place_forget()
-        self.handle_NE_canvas.place_forget()
-        self.handle_SW_canvas.place_forget()
-        self.handle_SE_canvas.place_forget()
-
-    def update_attr_frame(self):
-        for attr_label in self.attr_labels:
-            attr_label.destroy()
-        self.attr_labels = []
-        for attr_widget in self.attr_widgets:
-            attr_widget.destroy()
-        self.attr_widgets = []
-        selected_pyte_widget = self.selected_widget
-        attr_row = 0
-        event_row = 0
-        if self.selected_widget is None:
-            return
-        for k, v in selected_pyte_widget.get_input_type().items():
-            if v != pyted_widget_types.NO_INPUT:
-                if selected_pyte_widget.get_code_template(k).startswith('<'):
-                    property_frame = self.event_frame
-                    event_row = event_row + 1
-                    property_row = event_row
-                else:
-                    property_frame = self.attr_frame
-                    attr_row = attr_row + 1
-                    property_row = attr_row
-                lab = tkinter.Label(property_frame, text=k)
-                lab.grid(row=property_row, column=0, sticky='W')
-                self.attr_labels.append(lab)
-                if v == pyted_widget_types.SINGLE_INPUT:
-                    widget_attr = getattr(selected_pyte_widget, k)
-                    e = ttk.Entry(property_frame, takefocus=True)
-                    e.grid(row=property_row, column=1, sticky='NWES')
-                    e.insert(0, str(widget_attr))
-                    # self.entry_attr.bind("<Return>", self.pyte_code.attr_entry_changed)
-                    # self.entry_attr.bind("<FocusOut>", self.pyte_code.attr_entry_changed)
-                    e.bind("<Return>", lambda
-                           event, arg1=k, arg2=e:
-                           self.attr_entry_callback(event, arg1, arg2)
-                           )
-                    e.bind("<FocusOut>", lambda
-                           event, arg1=k, arg2=e:
-                           self.attr_entry_callback(event, arg1, arg2)
-                           )
-                    self.attr_widgets.append(e)
-                elif v == pyted_widget_types.SINGLE_OPTION:
-                    widget_attr = getattr(selected_pyte_widget, k)
-                    cb = ttk.Combobox(property_frame)
-                    cb.configure(state='readonly')
-                    cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
-                    cb.set(widget_attr)
-                    cb['values'] = list(self.selected_widget.get_input_options(k))
-                    # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
-                    cb.bind('<<ComboboxSelected>>', lambda
-                            event, arg1=k, arg2=cb:
-                            self.attr_combobox_callback(event, arg1, arg2)
-                            )
-                    self.attr_widgets.append(cb)
-                elif v == pyted_widget_types.BOOL_INPUT:
-                    widget_attr = getattr(selected_pyte_widget, k)
-                    cb = ttk.Combobox(property_frame)
-                    cb.configure(state='readonly')
-                    cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
-                    if widget_attr:
-                        cb.set('True')
-                    else:
-                        cb.set('False')
-                    cb['values'] = list(self.selected_widget.get_input_options(k))
-                    # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
-                    cb.bind('<<ComboboxSelected>>', lambda
-                            event, arg1=k, arg2=cb:
-                            self.attr_combobox_callback(event, arg1, arg2)
-                            )
-                    self.attr_widgets.append(cb)
-                elif v == pyted_widget_types.PARENT_OPTION:
-                    widget_attr = getattr(selected_pyte_widget, k)
-                    cb = ttk.Combobox(property_frame)
-                    cb.configure(state='readonly')
-                    cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
-                    cb.set(widget_attr)
-                    var_widgets = []
-                    for widget in self.widgets:
-                        if isinstance(widget, pyted_widget_types.Frame):
-                            var_widgets.append(widget.name)
-                    cb['values'] = var_widgets
-                    # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
-                    cb.bind('<<ComboboxSelected>>', lambda
-                            event, arg1=k, arg2=cb:
-                            self.attr_combobox_callback(event, arg1, arg2)
-                            )
-                    self.attr_widgets.append(cb)
-                elif v == pyted_widget_types.STRING_VAR_OPTION:
-                    widget_attr = getattr(selected_pyte_widget, k)
-                    cb = ttk.Combobox(property_frame)
-                    cb.configure(state='readonly')
-                    cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
-                    cb.set(widget_attr)
-                    var_widgets = []
-                    for widget in self.widgets:
-                        if isinstance(widget, pyted_widget_types.StringVar):
-                            var_widgets.append(widget.name)
-                    cb['values'] = var_widgets
-                    # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
-                    cb.bind('<<ComboboxSelected>>', lambda
-                            event, arg1=k, arg2=cb:
-                            self.attr_combobox_callback(event, arg1, arg2)
-                            )
-                    self.attr_widgets.append(cb)
-                elif v == pyted_widget_types.STRING_EVENT_OPTION:
-                    widget_attr = getattr(selected_pyte_widget, k)
-                    cb = ttk.Combobox(property_frame)
-                    cb.configure(state='readonly')
-                    cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
-                    cb.set(widget_attr)
-                    var_widgets = ['', selected_pyte_widget.name + '_' + k]
-                    cb['values'] = var_widgets
-                    # self.combobox_attr.bind('<<ComboboxSelected>>', self.pyte_code.attr_combobox_selected_callback)
-                    cb.bind('<<ComboboxSelected>>', lambda
-                            event, arg1=k, arg2=cb:
-                            self.attr_combobox_callback(event, arg1, arg2)
-                            )
-                    self.attr_widgets.append(cb)
-                else:
-                    raise Exception('input type not defined')
-
-        # fill row/col tab
-        pyte_parent = self.find_pyte_parent(selected_pyte_widget)
-        if (isinstance(selected_pyte_widget, pyted_widget_types.PytedPlacedWidget) and
-                not isinstance(pyte_parent, pyted_widget_types.Notebook)):
-            self.attr_notebook.add(self.pyted_window.row_col_tab_frame)
-            # row weight
-            lab = tkinter.Label(self.row_col_frame, text='row weight')
-            lab.grid(row=1, column=0, sticky='W')
-            self.attr_labels.append(lab)
-            row_config = self.find_pyte_parent(selected_pyte_widget).get_row_configuration(selected_pyte_widget.row)
-            widget_attr = row_config['weight']
-            e = ttk.Entry(self.row_col_frame, takefocus=True)
-            e.grid(row=1, column=1, sticky='NWES')
-            e.insert(0, str(widget_attr))
-            e.bind("<Return>", lambda
-                   event, arg1='row', arg2='weight', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            e.bind("<FocusOut>", lambda
-                   event, arg1='row', arg2='weight', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            self.attr_widgets.append(e)
-            # row minsize
-            lab = tkinter.Label(self.row_col_frame, text='row minsize')
-            lab.grid(row=2, column=0, sticky='W')
-            self.attr_labels.append(lab)
-            row_config = self.find_pyte_parent(selected_pyte_widget).get_row_configuration(selected_pyte_widget.row)
-            widget_attr = row_config['minsize']
-            e = ttk.Entry(self.row_col_frame, takefocus=True)
-            e.grid(row=2, column=1, sticky='NWES')
-            e.insert(0, str(widget_attr))
-            e.bind("<Return>", lambda
-                   event, arg1='row', arg2='minsize', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            e.bind("<FocusOut>", lambda
-                   event, arg1='row', arg2='minsize', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            self.attr_widgets.append(e)
-            # row pad
-            lab = tkinter.Label(self.row_col_frame, text='row pad')
-            lab.grid(row=3, column=0, sticky='W')
-            self.attr_labels.append(lab)
-            row_config = self.find_pyte_parent(selected_pyte_widget).get_row_configuration(selected_pyte_widget.row)
-            widget_attr = row_config['pad']
-            e = ttk.Entry(self.row_col_frame, takefocus=True)
-            e.grid(row=3, column=1, sticky='NWES')
-            e.insert(0, str(widget_attr))
-            e.bind("<Return>", lambda
-                   event, arg1='row', arg2='pad', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            e.bind("<FocusOut>", lambda
-                   event, arg1='row', arg2='pad', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            self.attr_widgets.append(e)
-            # col weight
-            lab = tkinter.Label(self.row_col_frame, text='col weight')
-            lab.grid(row=4, column=0, sticky='W')
-            self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(selected_pyte_widget).\
-                get_column_configuration(selected_pyte_widget.column)
-            widget_attr = col_config['weight']
-            e = ttk.Entry(self.row_col_frame, takefocus=True)
-            e.grid(row=4, column=1, sticky='NWES')
-            e.insert(0, str(widget_attr))
-            e.bind("<Return>", lambda
-                   event, arg1='col', arg2='weight', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            e.bind("<FocusOut>", lambda
-                   event, arg1='col', arg2='weight', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            self.attr_widgets.append(e)
-            # col minsize
-            lab = tkinter.Label(self.row_col_frame, text='col minsize')
-            lab.grid(row=5, column=0, sticky='W')
-            self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(selected_pyte_widget).\
-                get_column_configuration(selected_pyte_widget.column)
-            widget_attr = col_config['minsize']
-            e = ttk.Entry(self.row_col_frame, takefocus=True)
-            e.grid(row=5, column=1, sticky='NWES')
-            e.insert(0, str(widget_attr))
-            e.bind("<Return>", lambda
-                   event, arg1='col', arg2='minsize', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            e.bind("<FocusOut>", lambda
-                   event, arg1='col', arg2='minsize', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            self.attr_widgets.append(e)
-            # col pad
-            lab = tkinter.Label(self.row_col_frame, text='col pad')
-            lab.grid(row=6, column=0, sticky='W')
-            self.attr_labels.append(lab)
-            col_config = self.find_pyte_parent(selected_pyte_widget).\
-                get_column_configuration(selected_pyte_widget.column)
-            widget_attr = col_config['pad']
-            e = ttk.Entry(self.row_col_frame, takefocus=True)
-            e.grid(row=6, column=1, sticky='NWES')
-            e.insert(0, str(widget_attr))
-            e.bind("<Return>", lambda
-                   event, arg1='col', arg2='pad', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            e.bind("<FocusOut>", lambda
-                   event, arg1='col', arg2='pad', arg3=e:
-                   self.row_col_attr_entry_callback(event, arg1, arg2, arg3)
-                   )
-            self.attr_widgets.append(e)
-        else:
-            self.attr_notebook.hide(self.pyted_window.row_col_tab_frame)
-
-        # fill variable usage tab
-        if isinstance(selected_pyte_widget, pyted_widget_types.StringVar):
-            self.attr_notebook.add(self.pyted_window.var_use_tab_frame)
-            for var_label in self.var_labels:
-                var_label.destroy()
-            self.var_labels = []
-            for var_widget in self.var_widgets:
-                var_widget.destroy()
-            self.var_widgets = []
-            var_row = 0
-            if self.selected_widget is None:
-                return
-            for pyted_widget_search in self.widgets:
-                try:
-                    var_name = pyted_widget_search.textvariable
-                except AttributeError:
-                    var_name = None
-                if var_name is None:
-                    try:
-                        var_name = pyted_widget_search.variable
-                    except AttributeError:
-                        var_name = None
-
-                if var_name == selected_pyte_widget.name:
-                    var_use_frame = self.var_use_frame
-                    var_row = var_row + 1
-                    lab = tkinter.Label(var_use_frame, text=pyted_widget_search.name)
-                    lab.grid(row=var_row, column=0, sticky='W')
-                    self.var_labels.append(lab)
-                    lab = tkinter.Label(var_use_frame, text=pyted_widget_search.label)
-                    lab.grid(row=var_row, column=1, sticky='W')
-                    self.var_labels.append(lab)
-        else:
-            self.attr_notebook.hide(self.pyted_window.var_use_tab_frame)
-
-    # called when a row or column attribute entry box is changed
-    def row_col_attr_entry_callback(self, _event, row_col, attr, entrybox):
-        if self.selected_widget is not None:
-            if row_col == 'row':
-                self.find_pyte_parent(self.selected_widget).set_row_configuration(self.selected_widget.row, attr,
-                                                                                  entrybox.get())
-                self.find_tk_parent(self.selected_widget).rowconfigure(self.selected_widget.row, {attr: entrybox.get()})
-            if row_col == 'col':
-                self.find_pyte_parent(self.selected_widget).set_column_configuration(self.selected_widget.column, attr,
-                                                                                     entrybox.get())
-                self.find_tk_parent(self.selected_widget).columnconfigure(self.selected_widget.row,
-                                                                          {attr: entrybox.get()})
-        # self.update_attr_frame()
-
-    # called when an attribute entry box lost focus or return presses
-    def attr_entry_callback(self, _event, attrib, entrybox):
-        if self.selected_widget is not None:
-            return_value = self.update_widget_attribute(self.selected_widget, attrib, entrybox.get())
-            # self.update_attr_frame()
-            if return_value is not None:
-                messagebox.showwarning('Renaming problem',
-                                       'Name already exists for another widget and Name not changed')
-
-    # called attribute combo box enter button or lost focus
-    def attr_combobox_callback(self, _event, attrib, combobox):
-        if self.selected_widget is not None:
-            # attr_template = self.selected_widget.attr_template[attrib]
-            attr_template = self.selected_widget.get_input_type(attrib)
-            # if attr_template[0] == pyted_widgets.BOOL_INPUT:
-            if attr_template == pyted_widget_types.BOOL_INPUT:
-                if combobox.get() == 'True':
-                    self.update_widget_attribute(self.selected_widget, attrib, True)
-                else:
-                    self.update_widget_attribute(self.selected_widget, attrib, False)
-            else:
-                self.update_widget_attribute(self.selected_widget, attrib, combobox.get())
-            # self.update_attr_frame()
 
     def build_navigator_tree(self) -> None:
         """
@@ -1240,7 +825,7 @@ class Pyted:
             self.navigator_tree.delete(i)
 
         # put project widget as main branch
-        widget = self.widgets[0]
+        widget = self.widgets.widget_list[0]
         self.navigator_tree.insert('', 'end', widget.name,
                                    text=widget.name, values='"' + repr(widget.type) + '"',
                                    tags='project')
@@ -1248,7 +833,7 @@ class Pyted:
         project_name = widget.name
 
         # put vars into tree
-        for widget in self.widgets:
+        for widget in self.widgets.widget_list:
             try:
                 is_var = widget.is_var
             except AttributeError:
@@ -1259,8 +844,8 @@ class Pyted:
                                            tags='var')
 
         # put widgets into tree
-        widget = self.find_top_widget()
-        self.navigator_tree.insert(self.widgets[0].name, 'end', widget.name,
+        widget = self.widgets.find_top_widget()
+        self.navigator_tree.insert(self.widgets.widget_list[0].name, 'end', widget.name,
                                    text=widget.name, values='"' + repr(widget.type) + '"',
                                    tags='toplevel')
         self.navigator_tree.item(widget.name, open=True)
@@ -1278,7 +863,7 @@ class Pyted:
 
         :param parent: parent of widgets to be added to navigator tree
         """
-        for widget in self.widgets:
+        for widget in self.widgets.widget_list:
             try:
                 widget_type = widget.type
             except AttributeError:
@@ -1319,11 +904,11 @@ class Pyted:
     # called when filler label clicked using pointer
     def empty_label_click_callback(self, event):
         """Select parent container if filler label clicked"""
-        frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
+        frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
         self.select_widget(frame)
 
-    def find_grid_location(self, pyte_frame: Pyted_Widget_Type, x_root: int, y_root: int)\
-            -> (Pyted_Widget_Type, (int, int)):
+    def find_grid_location(self, pyte_frame: pyted_widget_types.PytedGridContainerWidget, x_root: int, y_root: int)\
+            -> (pyted_widget_types.PytedGridContainerWidget, (int, int)):
         """
         Find grid location in user_form
 
@@ -1343,7 +928,7 @@ class Pyted:
         y_location = y_root - tk_frame.winfo_rooty()
         grid_location = tk_frame.grid_location(x_location, y_location)
         # find location is actually a container
-        for pyte_widget in self.widgets:
+        for pyte_widget in self.widgets.widget_list:
             # if not pyte_widget.type == tkinter.Toplevel:
             try:
                 if (grid_location == (int(pyte_widget.column), int(pyte_widget.row)) and
@@ -1353,7 +938,7 @@ class Pyted:
                         break
                     if isinstance(pyte_widget, pyted_widget_types.Notebook):
                         # TODO: need to code to get correct tab
-                        for pyte_widget_child in self.widgets:
+                        for pyte_widget_child in self.widgets.widget_list:
                             if pyte_widget_child.parent == pyte_widget.name:
                                 possible_pyte_widget, possible_grid_location =\
                                     self.find_grid_location(pyte_widget_child, x_root, y_root)
@@ -1379,13 +964,13 @@ class Pyted:
         to None.
         """
         if self.selected_widget is not None:
-            self.remove_selected_widget_handles()
+            self.handles.remove_selected_widget_handles()
             self.selected_widget = None
-            self.update_attr_frame()
+            self.attr_frame.update(self.selected_widget)
 
     def escape_key_callback(self, _event):
-        self.widget_in_toolbox_chosen = None
-        self.widget_in_toolbox_chosen_double_click = False
+        self.widget_toolbox.widget_in_toolbox_chosen = None
+        self.widget_toolbox.widget_in_toolbox_chosen_double_click = False
         self.pointer_button.invoke()
         if self.proposed_widget is not None and self.proposed_widget_location is not None:
             self.new_filler_label(self.proposed_widget_frame.tk_name,
@@ -1412,77 +997,60 @@ class Pyted:
                 if not isinstance(self.selected_widget, pyted_widget_types.TopLevel):
                     self.delete_selected_widget()
                     self.selected_widget = None
-                    self.update_attr_frame()
+                    self.attr_frame.update(self.selected_widget)
 
     def delete_selected_widget(self):
         # print('delete widget at ', self.selected_widget.column, self.selected_widget.row)
         widget_to_delete = self.selected_widget
         self.deselect_selected_widget()
-        self.new_filler_label(self.find_tk_parent(widget_to_delete), widget_to_delete.column, widget_to_delete.row)
+        self.new_filler_label(self.widgets.find_tk_parent(widget_to_delete), widget_to_delete.column,
+                              widget_to_delete.row)
         widget_to_delete.tk_name.destroy()
-        self.widgets.remove(widget_to_delete)
+        self.widgets.widget_list.remove(widget_to_delete)
         self.build_navigator_tree()
 
     # called when widget in navigation tree clicked
     def navigator_tree_clicked(self, _event):
-        self.widget_in_toolbox_chosen = None
+        self.widget_toolbox.widget_in_toolbox_chosen = None
         self.pointer_button.invoke()
         pyte_widget = None
-        for pyte_widget in self.widgets:
+        for pyte_widget in self.widgets.widget_list:
             if pyte_widget.name == self.navigator_tree.focus():
                 break
         self.select_widget(pyte_widget)
 
-    def is_child_container(self, pyte_widget, parent_pyte_widget_name):
-        """Is pyte_widget a child of parent_pyte_widget_name (or the same widget)"""
-        if pyte_widget.name == self.find_top_widget().name:
-            if parent_pyte_widget_name == self.find_top_widget().name:
-                return True
-            else:
-                return False
-        elif pyte_widget.name == parent_pyte_widget_name:
-            return True
-        elif pyte_widget.parent == self.find_top_widget().name:
-            return False
-        else:
-            for i_pyte_widget in self.widgets:
-                if pyte_widget.parent == i_pyte_widget.name:
-                    return self.is_child_container(i_pyte_widget, parent_pyte_widget_name)
-            else:
-                raise Exception('could not find widget with name pyte_widget.parent')
-
     # called when button in toolbox clicked
     def toolbox_button_click_callback(self, _event, tk_widget_obj):
         self.deselect_selected_widget()
-        self.widget_in_toolbox_chosen = tk_widget_obj
-        self.widget_in_toolbox_chosen_double_click = False
+        self.widget_toolbox.widget_in_toolbox_chosen = tk_widget_obj
+        self.widget_toolbox.widget_in_toolbox_chosen_double_click = False
         # print(tk_widget_obj)
 
     # called when button in toolbox clicked
     def toolbox_button_double_click_callback(self, _event, tk_widget_obj):
         self.deselect_selected_widget()
-        self.widget_in_toolbox_chosen = tk_widget_obj
-        self.widget_in_toolbox_chosen_double_click = True
+        self.widget_toolbox.widget_in_toolbox_chosen = tk_widget_obj
+        self.widget_toolbox.widget_in_toolbox_chosen_double_click = True
 
     # called when var button in toolbox clicked
     def toolbox_var_button_click_callback(self, _event, tk_widget_obj):
         new_widget = tk_widget_obj()
         new_widget.name = self.generate_unique_name(new_widget)
-        new_widget.parent = self.widgets[0].name
+        new_widget.parent = self.widgets.widget_list[0].name
 
-        self.widgets.append(new_widget)
+        self.widgets.widget_list.append(new_widget)
         self.selected_widget = new_widget
         self.build_navigator_tree()
-        self.update_attr_frame()
-        self.remove_selected_widget_handles()
+        self.attr_frame.update(self.selected_widget)
+        self.handles.remove_selected_widget_handles()
         # print(len(self.widgets))
         # self.deselect_selected_widget()
-        self.widget_in_toolbox_chosen = None
-        self.user_frame.after(300, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
+        self.widget_toolbox.widget_in_toolbox_chosen = None
+        self.user_frame.after(300, lambda: self.widget_toolbox.widget_in_toolbox_chosen_tk_var.set('pointer'))
 
     # called when pointer button clicked in toolbox
     def toolbox_pointer_button_click(self, _event):
-        self.widget_in_toolbox_chosen = None
+        self.widget_toolbox.widget_in_toolbox_chosen = None
         # print('toolbox pointer button clicked', event.x, event.y)
         # self.deselect_selected_widget()
 
@@ -1496,11 +1064,12 @@ class Pyted:
 
     def inserted_widget_click(self, _event):
         # print('new widget', _event.x, _event.y, self.proposed_widget)
-        self.insert_widget(self.widget_in_toolbox_chosen(), self.proposed_widget, self.proposed_widget_frame,
+        self.insert_widget(self.widget_toolbox.widget_in_toolbox_chosen(), self.proposed_widget,
+                           self.proposed_widget_frame,
                            self.proposed_widget_location)
 
     def insert_widget(self, new_widget, proposed_widget, proposed_widget_frame, proposed_widget_location):
-        # new_widget = self.widget_in_toolbox_chosen()
+        # new_widget = self.widget_toolbox.widget_in_toolbox_chosen()
         new_widget.parent = proposed_widget_frame.name
         new_widget.column = proposed_widget_location[0]
         new_widget.row = proposed_widget_location[1]
@@ -1529,22 +1098,22 @@ class Pyted:
                 filler_label.bind("<Button-1>", self.empty_label_click_callback)
                 filler_label.bind("<ButtonRelease-1>", self.widget_release)
 
-        self.widgets.append(new_widget)
+        self.widgets.widget_list.append(new_widget)
         self.build_navigator_tree()
         # self.select_widget(new_widget)
 
         if isinstance(new_widget, pyted_widget_types.Notebook):
             child_frame_widget = pyted_widget_types.Frame()
             child_frame_widget.parent = new_widget
-            self.insert_widget(child_frame_widget, self.proposed_widget_tab, new_widget, [0,0])
+            self.insert_widget(child_frame_widget, self.proposed_widget_tab, new_widget, [0, 0])
 
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
         self.proposed_widget = None
 
-        if not self.widget_in_toolbox_chosen_double_click:
-            self.widget_in_toolbox_chosen = None
-            self.user_frame.after(30, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
+        if not self.widget_toolbox.widget_in_toolbox_chosen_double_click:
+            self.widget_toolbox.widget_in_toolbox_chosen = None
+            self.user_frame.after(30, lambda: self.widget_toolbox.widget_in_toolbox_chosen_tk_var.set('pointer'))
         # by return "break" we stop further event handling, which stops the inserted widget being active
         # self.select_widget(new_widget)
         # return "break"
@@ -1561,7 +1130,7 @@ class Pyted:
         potential_number = 1
         no_duplicate_found = False
         while not no_duplicate_found:
-            for pw in self.widgets:
+            for pw in self.widgets.widget_list:
                 if pw.name == new_widget.label.lower() + str(potential_number):
                     potential_number = potential_number + 1
                     break
@@ -1574,7 +1143,7 @@ class Pyted:
         root.filename = filedialog.asksaveasfilename(title="Select file", defaultextension=".py",
                                                      filetypes=(("python files", "*.py"), ("all files", "*.*")))
         if not root.filename == '':
-            code = save_load.generate_code(self.widgets)
+            code = save_load.generate_code(self.widgets.widget_list)
             with open(root.filename, 'w') as f:
                 f.write(code)
         else:
@@ -1587,7 +1156,7 @@ class Pyted:
                                                    filetypes=(("python files", "*.py"), ("all files", "*.*")))
         if not root.filename == '':
             with open(root.filename) as f:
-                self.widgets = save_load.parse_code(f)
+                self.widgets.widget_list = save_load.parse_code(f)
                 parent_pyte_widget = self.draw_user_frame()
                 self.selected_widget = parent_pyte_widget
                 self.build_navigator_tree()
@@ -1597,14 +1166,9 @@ class Pyted:
             pass
 
     def menu_preview(self):
-        code = save_load.generate_code(self.widgets)
+        code = save_load.generate_code(self.widgets.widget_list)
         name_space = {}
         exec(code, name_space)
         gui_class = name_space['GuiCollection']
         # gui = gui_class()
         gui_class()
-
-
-if __name__ == '__main__':
-    x = Pyted()
-    # x.show()

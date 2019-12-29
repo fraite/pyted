@@ -2,7 +2,7 @@
 import inspect
 import importlib.resources as pkg_resources
 
-from pyted_package import pyted_widget_types
+from pyted import pyted_widget_types
 
 
 def generate_code(widgets) -> str:
@@ -31,7 +31,7 @@ def generate_code(widgets) -> str:
 
     code = code + f'\n'
     code = code + f'\n'
-    code_bit = pkg_resources.read_text('pyted_package.save_load_package.code_bits', 'init_tk_var')
+    code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'init_tk_var')
     code = code + code_bit
     code = code + f'\n'
     code = code + f'\n'
@@ -60,7 +60,7 @@ def generate_code(widgets) -> str:
     code = code + f'\n'
     code = code + f'\n'
 
-    code_bit = pkg_resources.read_text('pyted_package.save_load_package.code_bits', 'widget_init_end')
+    code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'widget_init_end')
     code = code + code_bit
     code = code + f'\n'
     code = code + f'\n'
@@ -72,7 +72,7 @@ def generate_code(widgets) -> str:
             top_level_widget = pyted_widget
             break
 
-    code_bit = pkg_resources.read_text('pyted_package.save_load_package.code_bits', 'win_close')
+    code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'win_close')
     code_bit = code_bit.replace('{top_level_name}', top_level_widget.name)
     code = code + code_bit
     code = code + f'\n'
@@ -81,7 +81,7 @@ def generate_code(widgets) -> str:
     code = code + f'def {top_level_widget.name}(gui_binder=None, parent=None, modal=True):\n'
     code = code + f'    appl = {parent_widget}(gui_binder, parent, modal)\n'
     # code = code + f'    return appl\n'
-    code_bit = pkg_resources.read_text('pyted_package.save_load_package.code_bits', 'gui_runner_method')
+    code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'gui_runner_method')
     # code_bit = code_bit.replace('{top_level_name}', top_level_widget.name)
     code = code + code_bit
     code = code + f'\n'
