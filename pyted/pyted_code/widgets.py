@@ -99,3 +99,11 @@ class Widgets:
                     return self.is_child_container(i_pyte_widget, parent_pyte_widget_name)
             else:
                 raise Exception('could not find widget with name pyte_widget.parent')
+
+    def get_pyte_widget(self, tk_widget):
+        """Get pyte widget that has tk_widget in the user form"""
+        for pyte_widget in self.widget_list:
+            if pyte_widget.label != 'Project':
+                if tk_widget == pyte_widget.tk_name:
+                    return pyte_widget
+        raise Exception(f"pyte widget not found for tk widget {tk_widget}")

@@ -248,8 +248,8 @@ class PytedCore:
         for child_widget in parent_pyte_widget.tk_name.grid_slaves():
             if child_widget in self.filler_labels:
                 self.filler_labels.remove(child_widget)
-            elif isinstance(self.get_pyte_widget(child_widget), pyted_widget_types.Frame):
-                self.empty_tk_container_widget(self.get_pyte_widget(child_widget))
+            elif isinstance(self.widgets.get_pyte_widget(child_widget), pyted_widget_types.Frame):
+                self.empty_tk_container_widget(self.widgets.get_pyte_widget(child_widget))
             child_widget.destroy()
 
     def user_motion_callback(self, event):
@@ -389,7 +389,6 @@ class PytedCore:
                     self.new_filler_label(old_proposed_widget_frame.tk_name,
                                           old_proposed_widget_location[0], old_proposed_widget_location[1])
 
-    # TODO: move this to sub packet to allow widget_attribute_frame package not to refer to pyted_core
     def update_widget_attribute(self, pyte_widget: Pyted_Widget_Type, attr: str, new_value: Union[str, bool],
                                 init=False) -> Union[None, tuple]:
         """Update a widget attribute with a new value
@@ -581,14 +580,6 @@ class PytedCore:
         else:
             raise Exception(f'attr_template "{attr_template}" not yet configured')
             # print(f'attr_template {attr_template} not yet implemented for {attr}')
-
-    def get_pyte_widget(self, tk_widget):
-        """Get pyte widget that has tk_widget in the user form"""
-        for pyte_widget in self.widgets.widget_list:
-            if pyte_widget.label != 'Project':
-                if tk_widget == pyte_widget.tk_name:
-                    return pyte_widget
-        raise Exception(f"pyte widget not found for tk widget {tk_widget}")
 
     # called when a widget clicked using pointer
     def widget_click(self, _event, pyte_widget):
