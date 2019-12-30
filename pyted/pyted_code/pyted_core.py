@@ -1,4 +1,3 @@
-import inspect
 import tkinter
 from tkinter import ttk
 from typing import Union
@@ -11,6 +10,7 @@ from pyted.pyted_window import PytedWindow
 from pyted.pyted_code.widget_handles import Handles
 from pyted.pyted_code.widget_attribute_frame import AttributeFrame
 from pyted.pyted_code.widget_toolbox_notebook import WidgetToolboxNotebook
+from pyted.pyted_code.widget_navigator_tree import NavigatorTree
 
 FILLER_TEXT = '        .        '
 Pyted_Widget_Type = Union[pyted_widget_types.Project, pyted_widget_types.StringVar,
@@ -49,17 +49,19 @@ class PytedCore:
         self.background_user_frame = self.pyted_window.background_user_frame
         self.user_frame = self.pyted_window.user_frame
         # self.ttk_toolbox_frame = pyted_window.ttk_toolbox_frame
-        self.navigator_tree = self.pyted_window.navigator_tree
 
         self.handles = Handles(self.root_window)
         self.attr_frame = AttributeFrame(self)
 
+
         parent_pyte_widget = self.draw_user_frame()
+
+        self.navigator_tree_class = NavigatorTree(self)
+        self.navigator_tree = self.navigator_tree_class.navigator_tree
 
         self.widget_toolbox: WidgetToolboxNotebook = WidgetToolboxNotebook(self)
 
-
-        self.build_navigator_tree()
+        self.navigator_tree_class.build_navigator_tree()
         self.select_widget(parent_pyte_widget)
         self.draw_user_frame()
         self.handles.place_selected_widget_handles(self.user_frame)
@@ -546,7 +548,7 @@ class PytedCore:
                 if i_pyte_widget.parent == old_value:
                     i_pyte_widget.parent = new_value
             # self.update_navigator_tree()
-            self.navigator_tree_change_item_name(pyte_widget, old_value)
+            self.navigator_tree_class.navigator_tree_change_item_name(pyte_widget, old_value)
             # raise Exception(f'renaming widget not yet implemented')
 
         elif attr_template == pyted_widget_types.BESPOKE_CODE and (attr == 'comment'):
@@ -693,7 +695,7 @@ class PytedCore:
                 self.attr_frame.update(self.selected_widget)
                 self.handles.place_selected_widget_handles(clone)
                 if widget_changed_frame:
-                    self.build_navigator_tree()
+                    self.navigator_tree_class.build_navigator_tree()
                 # print('end move widget')
 
     def select_widget(self, new_selected_pyte_widget) -> None:
@@ -727,97 +729,7 @@ class PytedCore:
 
         self.attr_frame.update(self.selected_widget)
         # self.update_navigator_tree()
-        self.navigator_tree_select_item()
-
-    def build_navigator_tree(self) -> None:
-        """
-        Update navigator tree to show all widgets
-
-        Clears the navigator tree and updates it with all widgets in the project as held in the list self.widgets.
-
-        Note that the first widget in the list must be the TopLevel widget, but all the other widgets may be in any
-        order.
-        """
-        # remove old items from navigator tree
-        for i in self.navigator_tree.get_children():
-            self.navigator_tree.delete(i)
-
-        # put project widget as main branch
-        widget = self.widgets.widget_list[0]
-        self.navigator_tree.insert('', 'end', widget.name,
-                                   text=widget.name, values='"' + repr(widget.type) + '"',
-                                   tags='project')
-        self.navigator_tree.item(widget.name, open=True)
-        project_name = widget.name
-
-        # put vars into tree
-        for widget in self.widgets.widget_list:
-            try:
-                is_var = widget.is_var
-            except AttributeError:
-                is_var = False
-            if is_var:
-                self.navigator_tree.insert(project_name, 'end', widget.name,
-                                           text=widget.name, values='"' + repr(widget.type) + '"',
-                                           tags='var')
-
-        # put widgets into tree
-        widget = self.widgets.find_top_widget()
-        self.navigator_tree.insert(self.widgets.widget_list[0].name, 'end', widget.name,
-                                   text=widget.name, values='"' + repr(widget.type) + '"',
-                                   tags='toplevel')
-        self.navigator_tree.item(widget.name, open=True)
-        self.build_navigator_tree_parent(widget)
-        if self.selected_widget is not None:
-            self.navigator_tree.focus(self.selected_widget.name)
-            self.navigator_tree.selection_set(self.selected_widget.name)
-
-    def build_navigator_tree_parent(self, parent: pyted_widget_types) -> None:
-        """
-        Adds items to the navigator tree with the parent specified
-
-        Adds all widgets with the parent specified as items to the navigator tree. Container widgets are also added
-        with the branch opened and the function called recursively to fill the tree.
-
-        :param parent: parent of widgets to be added to navigator tree
-        """
-        for widget in self.widgets.widget_list:
-            try:
-                widget_type = widget.type
-            except AttributeError:
-                widget_type = None
-            if not widget_type == tkinter.Toplevel:
-                if widget.parent == parent.name:
-                    self.navigator_tree.insert(widget.parent, 'end', widget.name,
-                                               text=widget.name, values='"' + repr(widget.type) + '"',
-                                               tags='widget')
-                    # TODO: change the below to use container widget superclass
-                    if isinstance(widget, pyted_widget_types.Frame) or isinstance(widget, pyted_widget_types.Notebook):
-                        self.navigator_tree.item(widget.name, open=True)
-                        self.build_navigator_tree_parent(widget)
-
-    def navigator_tree_select_item(self):
-        if self.selected_widget is not None:
-            self.navigator_tree.focus(self.selected_widget.name)
-            self.navigator_tree.selection_set(self.selected_widget.name)
-            self.navigator_tree.see(self.selected_widget.name)
-
-    def navigator_tree_change_item_name(self, pyte_widget, old_name):
-        item_index = self.navigator_tree.index(old_name)
-        item_parent = self.navigator_tree.parent(old_name)
-        old_item_is_open = self.navigator_tree.item(old_name, 'open')
-        # print(old_item_is_open)
-        self.navigator_tree.insert(item_parent, item_index, pyte_widget.name,
-                                   text=pyte_widget.name, values='"' + repr(pyte_widget.type) + '"',
-                                   tags='widget')
-        children = self.navigator_tree.get_children(old_name)
-        for child in children:
-            self.navigator_tree.move(child, pyte_widget.name, tkinter.END)
-        self.navigator_tree.item(pyte_widget.name, open=old_item_is_open)
-        self.navigator_tree.delete(old_name)
-        if self.selected_widget is not None:
-            self.navigator_tree.focus(self.selected_widget.name)
-            self.navigator_tree.selection_set(self.selected_widget.name)
+        self.navigator_tree_class.navigator_tree_select_item()
 
     # called when filler label clicked using pointer
     def empty_label_click_callback(self, event):
@@ -925,17 +837,7 @@ class PytedCore:
                               widget_to_delete.row)
         widget_to_delete.tk_name.destroy()
         self.widgets.widget_list.remove(widget_to_delete)
-        self.build_navigator_tree()
-
-    # called when widget in navigation tree clicked
-    def navigator_tree_clicked(self, _event):
-        self.widget_toolbox.widget_in_toolbox_chosen = None
-        self.widget_toolbox.pointer_button.invoke()
-        pyte_widget = None
-        for pyte_widget in self.widgets.widget_list:
-            if pyte_widget.name == self.navigator_tree.focus():
-                break
-        self.select_widget(pyte_widget)
+        self.navigator_tree_class.build_navigator_tree()
 
     def user_frame_leave_callback(self, _event):
         if self.proposed_widget is not None and self.proposed_widget_location is not None:
@@ -982,7 +884,7 @@ class PytedCore:
                 filler_label.bind("<ButtonRelease-1>", self.widget_release)
 
         self.widgets.widget_list.append(new_widget)
-        self.build_navigator_tree()
+        self.navigator_tree_class.build_navigator_tree()
         # self.select_widget(new_widget)
 
         if isinstance(new_widget, pyted_widget_types.Notebook):
@@ -1035,6 +937,7 @@ class PytedCore:
 
     def menu_file_load(self):
         root = self.root_window
+        print(self.root_window)
         root.filename = filedialog.askopenfilename(initialfile='ddd.py', title="Select file",
                                                    filetypes=(("python files", "*.py"), ("all files", "*.*")))
         if not root.filename == '':
@@ -1042,7 +945,7 @@ class PytedCore:
                 self.widgets.widget_list = save_load.parse_code(f)
                 parent_pyte_widget = self.draw_user_frame()
                 self.selected_widget = parent_pyte_widget
-                self.build_navigator_tree()
+                self.navigator_tree_class.build_navigator_tree()
                 self.select_widget(parent_pyte_widget)
         else:
             # no cancel pressed

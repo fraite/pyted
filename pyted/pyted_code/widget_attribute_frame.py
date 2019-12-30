@@ -10,7 +10,6 @@ import pyted.pyted_code.widgets as widgets
 import pyted.pyted_code.widget_handles as widget_handles
 
 
-
 class AttributeFrame:
     """Widget attribute frame
 

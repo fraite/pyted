@@ -1,11 +1,18 @@
+#
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import tkinter
 from tkinter import ttk
+
+if TYPE_CHECKING:
+    from pyted.pyted_code.pyted_core import PytedCore
 
 
 class PytedWindow:
     """The toolbox panel"""
 
-    def __init__(self, root, pyte_code):
+    def __init__(self, root, pyte_code: PytedCore):
         self.pyte_code = pyte_code
         self.win = root
         self.win.title('Pyted')
@@ -47,14 +54,6 @@ class PytedWindow:
         self.navigator_tree['columns'] = 'widget_type'
         self.navigator_tree.column('widget_type', width=100, anchor=tkinter.CENTER)
         self.navigator_tree.heading('widget_type', text='Widget Type')
-        self.navigator_tree.tag_bind('project', '<ButtonRelease-1>',
-                                     self.pyte_code.navigator_tree_clicked)
-        self.navigator_tree.tag_bind('toplevel', '<ButtonRelease-1>',
-                                     self.pyte_code.navigator_tree_clicked)
-        self.navigator_tree.tag_bind('var', '<ButtonRelease-1>',
-                                     self.pyte_code.navigator_tree_clicked)
-        self.navigator_tree.tag_bind('widget', '<ButtonRelease-1>',
-                                     self.pyte_code.navigator_tree_clicked)
         self.navigator_tree.grid(column=0, row=1, sticky=(tkinter.N + tkinter.S))
         self.scrollbar_navigator = ttk.Scrollbar(self.navigator_frame, orient=tkinter.VERTICAL,
                                                  command=self.navigator_tree.yview)

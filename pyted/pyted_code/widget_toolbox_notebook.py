@@ -1,12 +1,15 @@
+#
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import inspect
 import tkinter
 from tkinter import ttk
 
 import pyted.pyted_widget_types as pyted_widget_types
-import pyted.pyted_code.pyted_core as pyted_core_module
-import pyted.pyted_code.widgets as widgets
-import pyted.pyted_code.widget_handles as widget_handles
-import pyted.pyted_code.widget_attribute_frame as widget_attribute_frame
+if TYPE_CHECKING:
+    from pyted.pyted_code.pyted_core import PytedCore
+
 
 class WidgetToolboxNotebook:
     """Widget attribute frame
@@ -15,12 +18,13 @@ class WidgetToolboxNotebook:
     and column attributes of the parent.
     """
 
-    def __init__(self, pyted_core: pyted_core_module):
-        self.pyted_core: pyted_core_module = pyted_core
+    def __init__(self, pyted_core: PytedCore):
+        self.pyted_core = pyted_core
         self.pyted_window = pyted_core.pyted_window
-        self.widgets: widgets.Widgets = pyted_core.widgets
-        self.attr_frame: widget_attribute_frame = pyted_core.attr_frame
-        self.handles: widget_handles = pyted_core.handles
+        self.widgets = pyted_core.widgets
+        self.attr_frame = pyted_core.attr_frame
+        self.handles = pyted_core.handles
+        self.navigator_tree = pyted_core.navigator_tree_class
 
         self.widget_in_toolbox_chosen = None
         self.widget_in_toolbox_chosen_tk_var = tkinter.StringVar()
@@ -122,7 +126,7 @@ class WidgetToolboxNotebook:
 
         self.widgets.widget_list.append(new_widget)
         self.pyted_core.selected_widget = new_widget
-        self.pyted_core.build_navigator_tree()
+        self.navigator_tree.build_navigator_tree()
         self.attr_frame.update(self.pyted_core.selected_widget)
         self.handles.remove_selected_widget_handles()
         # print(len(self.widgets))
