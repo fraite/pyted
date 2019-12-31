@@ -107,3 +107,23 @@ class Widgets:
                 if tk_widget == pyte_widget.tk_name:
                     return pyte_widget
         raise Exception(f"pyte widget not found for tk widget {tk_widget}")
+
+    def generate_unique_name(self, new_widget: pyted_widget_types) -> str:
+        """
+        Generate a unique name for a given widget
+
+        Returns a unique name for a given widget, generally of in the form of the widget type and a number.
+
+        :param new_widget: widget to be named
+        :return: unique name for widget
+        """
+        potential_number = 1
+        no_duplicate_found = False
+        while not no_duplicate_found:
+            for pw in self.widget_list:
+                if pw.name == new_widget.label.lower() + str(potential_number):
+                    potential_number = potential_number + 1
+                    break
+            else:
+                no_duplicate_found = True
+        return new_widget.label.lower() + str(potential_number)

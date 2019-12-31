@@ -121,7 +121,7 @@ class WidgetToolboxNotebook:
     # called when var button in toolbox clicked
     def toolbox_var_button_click_callback(self, _event, tk_widget_obj):
         new_widget = tk_widget_obj()
-        new_widget.name = self.pyted_core.generate_unique_name(new_widget)
+        new_widget.name = self.widgets.generate_unique_name(new_widget)
         new_widget.parent = self.widgets.widget_list[0].name
 
         self.widgets.widget_list.append(new_widget)

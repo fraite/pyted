@@ -365,7 +365,7 @@ class PytedCore:
                                     self.filler_labels.append(new_label)
                             self.proposed_widget.add(self.proposed_widget_tab, text='tab 1')
                         elif hasattr(self.widget_toolbox.widget_in_toolbox_chosen, 'text'):
-                            text = self.generate_unique_name(self.widget_toolbox.widget_in_toolbox_chosen)
+                            text = self.widgets.generate_unique_name(self.widget_toolbox.widget_in_toolbox_chosen)
                             if hasattr(self.widget_toolbox.widget_in_toolbox_chosen, 'value'):
                                 self.proposed_widget = self.widget_toolbox.widget_in_toolbox_chosen.type(frame.tk_name,
                                                                                                          text=text,
@@ -859,7 +859,7 @@ class PytedCore:
         new_widget.column = proposed_widget_location[0]
         new_widget.row = proposed_widget_location[1]
         new_widget.tk_name = proposed_widget
-        new_widget.name = self.generate_unique_name(new_widget)
+        new_widget.name = self.widgets.generate_unique_name(new_widget)
         if hasattr(new_widget, 'text'):
             if hasattr(new_widget, 'value'):
                 new_widget.text = new_widget.name
@@ -902,26 +902,6 @@ class PytedCore:
         # by return "break" we stop further event handling, which stops the inserted widget being active
         # self.select_widget(new_widget)
         # return "break"
-
-    def generate_unique_name(self, new_widget: pyted_widget_types) -> str:
-        """
-        Generate a unique name for a given widget
-
-        Returns a unique name for a given widget, generally of in the form of the widget type and a number.
-
-        :param new_widget: widget to be named
-        :return: unique name for widget
-        """
-        potential_number = 1
-        no_duplicate_found = False
-        while not no_duplicate_found:
-            for pw in self.widgets.widget_list:
-                if pw.name == new_widget.label.lower() + str(potential_number):
-                    potential_number = potential_number + 1
-                    break
-            else:
-                no_duplicate_found = True
-        return new_widget.label.lower() + str(potential_number)
 
     def menu_file_save(self):
         root = self.root_window
