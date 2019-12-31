@@ -251,29 +251,6 @@ class PytedCore:
             raise Exception(f'attr_template "{attr_template}" not yet configured')
             # print(f'attr_template {attr_template} not yet implemented for {attr}')
 
-    # called when a widget clicked using pointer
-    def widget_click(self, _event, pyte_widget):
-        self.user_form.mouse_button1_pressed = True
-        if self.widget_in_toolbox_chosen is None:
-            # frame, grid_location = self.find_grid_location(self.find_top_widget(), event.x_root, event.y_root)
-            # print('-->', frame.name, grid_location, pyte_widget.name, pyte_widget.parent)
-            # self.selected_current_frame = frame
-            # self.selected_widget_current_column = grid_location[0]
-            # self.selected_widget_current_row = grid_location[1]
-            if self.selected_widget is None or self.selected_widget != pyte_widget:
-                # no widget selected so selecting a widget or different widget selected
-                self.select_widget(pyte_widget)
-                self.user_form.widget_to_deselect_if_not_moved = None
-            else:
-                # may need to deselect widget if mouse not moved
-                self.user_form.widget_to_deselect_if_not_moved = pyte_widget
-            return "break"
-        elif (self.widget_in_toolbox_chosen is pyted_widget_types.Frame and
-              isinstance(pyte_widget, pyted_widget_types.Notebook)):
-            self.insert_widget(self.widget_in_toolbox_chosen(), self.user_form.proposed_widget,
-                               self.user_form.proposed_widget_frame,
-                               [0, 0])
-
     # called when a (not filler) widget released using pointer
     def widget_release(self, _event):
         # print("widget release:", event.x_root, event.y_root)
@@ -295,7 +272,7 @@ class PytedCore:
             # x_location = event.x_root - self.user_form.user_frame.winfo_rootx()
             # y_location = event.y_root - self.user_form.user_frame.winfo_rooty()
             # grid_location = self.user_form.user_frame.grid_location(x_location, y_location)
-            frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
+            frame, grid_location = self.user_form.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
             if self.selected_widget.type == tkinter.Toplevel:
                 selected_widget_current_row = None
                 selected_widget_current_column = None
@@ -402,57 +379,8 @@ class PytedCore:
     # called when filler label clicked using pointer
     def empty_label_click_callback(self, event):
         """Select parent container if filler label clicked"""
-        frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
+        frame, grid_location = self.user_form.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
         self.select_widget(frame)
-
-    def find_grid_location(self, pyte_frame: pyted_widget_types.PytedGridContainerWidget, x_root: int, y_root: int)\
-            -> (pyted_widget_types.PytedGridContainerWidget, (int, int)):
-        """
-        Find grid location in user_form
-
-        Returns the grid location in the user_form (the GUI being designed by the user) for a given set of
-        co-ordinates. If the co-ordinates are in a container within the main GUI, the grid location will be that of the
-        container. The container is also returned.
-
-        This function is called recursively to find the inner-most container.
-
-        :param pyte_frame: the parent frame (normally TopLevel)
-        :param x_root: x co-ordinate
-        :param y_root: y co-ordinate
-        :return: container and grid location for given point
-        """
-        tk_frame = pyte_frame.tk_name
-        x_location = x_root - tk_frame.winfo_rootx()
-        y_location = y_root - tk_frame.winfo_rooty()
-        grid_location = tk_frame.grid_location(x_location, y_location)
-        # find location is actually a container
-        for pyte_widget in self.widgets.widget_list:
-            # if not pyte_widget.type == tkinter.Toplevel:
-            try:
-                if (grid_location == (int(pyte_widget.column), int(pyte_widget.row)) and
-                        pyte_widget.parent == pyte_frame.name):
-                    if isinstance(pyte_widget, pyted_widget_types.Frame):
-                        pyte_widget, grid_location = self.find_grid_location(pyte_widget, x_root, y_root)
-                        break
-                    if isinstance(pyte_widget, pyted_widget_types.Notebook):
-                        # TODO: need to code to get correct tab
-                        for pyte_widget_child in self.widgets.widget_list:
-                            if pyte_widget_child.parent == pyte_widget.name:
-                                possible_pyte_widget, possible_grid_location =\
-                                    self.find_grid_location(pyte_widget_child, x_root, y_root)
-                                # check to see if location is in notebook for frame
-                                if possible_grid_location[1] >= 0:
-                                    pyte_widget = possible_pyte_widget
-                                    grid_location = possible_grid_location
-                                else:
-                                    grid_location = [0, 0]
-                                break
-                        break
-            except AttributeError:
-                pass
-        else:
-            pyte_widget = pyte_frame
-        return pyte_widget, grid_location
 
     def deselect_selected_widget(self) -> None:
         """
@@ -538,7 +466,7 @@ class PytedCore:
         new_widget.tk_name.bind("<B1-Motion>", self.widget_move)
         new_widget.tk_name.bind("<Button-1>", lambda
                                 w_event, arg1=new_widget:
-                                self.widget_click(w_event, arg1)
+                                self.user_form.widget_click(w_event, arg1)
                                 )
         new_widget.tk_name.bind("<ButtonRelease-1>", self.widget_release)
 
