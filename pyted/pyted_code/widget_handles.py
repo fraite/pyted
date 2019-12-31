@@ -34,7 +34,7 @@ class Handles:
         self.handle_SW_canvas.place(x=(widget_x1 - root_x - 4), y=(widget_y2 - root_y - 4))
         self.handle_SE_canvas.place(x=(widget_x2 - root_x - 4), y=(widget_y2 - root_y - 4))
 
-    def remove_selected_widget_handles(self):
+    def remove_selected_widget_handles(self) -> None:
         """Remove widget handles
 
         Removes widget handles from widget (normally selected widget)

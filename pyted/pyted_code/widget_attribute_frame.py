@@ -1,13 +1,16 @@
+#
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
 import tkinter
 from tkinter import ttk
 from tkinter import messagebox
 from typing import List, Union
 
 import pyted.pyted_widget_types as pyted_widget_types
+if TYPE_CHECKING:
+    from pyted.pyted_code.pyted_core import PytedCore
 
-import pyted.pyted_code.pyted_core as pyted_core_module
-import pyted.pyted_code.widgets as widgets
-import pyted.pyted_code.widget_handles as widget_handles
 
 
 class AttributeFrame:
@@ -17,12 +20,11 @@ class AttributeFrame:
     and column attributes of the parent.
     """
 
-    def __init__(self, pyted_core: pyted_core_module):
-        self.pyted_core: pyted_core_module = pyted_core
-        self.handles: widget_handles = pyted_core.handles
+    def __init__(self, pyted_core: PytedCore):
+        self.pyted_core = pyted_core
+        self.handles = pyted_core.handles
         self.pyted_window = pyted_core.pyted_window
-        self.widgets: widgets.Widgets = pyted_core.widgets
-        # TODO: convert self.pyted_code.widgets to widgets, remove pyted_core
+        self.widgets = pyted_core.widgets
 
         self.attr_labels: List[tkinter.Widget] = []
         self.attr_widgets: List[tkinter.Widget] = []

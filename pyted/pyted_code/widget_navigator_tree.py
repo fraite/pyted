@@ -18,10 +18,9 @@ class NavigatorTree:
 
     def __init__(self, pyted_core: PytedCore):
         self.pyted_core = pyted_core
-        self.pyted_window = pyted_core.pyted_window
         self.widgets = pyted_core.widgets
 
-        self.navigator_tree = self.pyted_window.navigator_tree
+        self.navigator_tree = pyted_core.pyted_window.navigator_tree
         self.navigator_tree.tag_bind('project', '<ButtonRelease-1>',
                                      self.navigator_tree_clicked)
         self.navigator_tree.tag_bind('toplevel', '<ButtonRelease-1>',
