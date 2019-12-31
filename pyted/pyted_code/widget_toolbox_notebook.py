@@ -24,9 +24,8 @@ class WidgetToolboxNotebook:
         self.widgets = pyted_core.widgets
         self.attr_frame = pyted_core.attr_frame
         self.handles = pyted_core.handles
-        self.navigator_tree = pyted_core.navigator_tree_class
+        self.navigator_tree = pyted_core.navigator_tree_obj
 
-        self.widget_in_toolbox_chosen = None
         self.widget_in_toolbox_chosen_tk_var = tkinter.StringVar()
         self.widget_in_toolbox_chosen_double_click = False
 
@@ -82,14 +81,14 @@ class WidgetToolboxNotebook:
                         except AttributeError:
                             is_var = False
                         if is_var:
-                            new_button.bind("<Button-1>", lambda
+                            new_button.bind("<ButtonRelease>", lambda
                                             event, arg1=obj:
-                                            self.toolbox_var_button_click_callback(event, arg1)
+                                            self.toolbox_var_button_release_callback(event, arg1)
                                             )
                         else:
-                            new_button.bind("<Button-1>", lambda
+                            new_button.bind("<ButtonRelease>", lambda
                                             event, arg1=obj:
-                                            self.toolbox_button_click_callback(event, arg1)
+                                            self.toolbox_button_release_callback(event, arg1)
                                             )
                             new_button.bind("<Double-Button-1>", lambda
                                             event, arg1=obj:
@@ -106,20 +105,21 @@ class WidgetToolboxNotebook:
                         pass
 
     # called when button in toolbox clicked
-    def toolbox_button_click_callback(self, _event, tk_widget_obj):
+    def toolbox_button_release_callback(self, _event, tk_widget_obj):
         self.pyted_core.deselect_selected_widget()
-        self.widget_in_toolbox_chosen = tk_widget_obj
+        self.pyted_core.widget_in_toolbox_chosen = tk_widget_obj
         self.widget_in_toolbox_chosen_double_click = False
         # print(tk_widget_obj)
 
     # called when button in toolbox double clicked
+    # TODO: Double click not working anymore
     def toolbox_button_double_click_callback(self, _event, tk_widget_obj):
         self.pyted_core.deselect_selected_widget()
-        self.widget_in_toolbox_chosen = tk_widget_obj
+        self.pyted_core.widget_in_toolbox_chosen = tk_widget_obj
         self.widget_in_toolbox_chosen_double_click = True
 
     # called when var button in toolbox clicked
-    def toolbox_var_button_click_callback(self, _event, tk_widget_obj):
+    def toolbox_var_button_release_callback(self, _event, tk_widget_obj):
         new_widget = tk_widget_obj()
         new_widget.name = self.widgets.generate_unique_name(new_widget)
         new_widget.parent = self.widgets.widget_list[0].name
@@ -131,11 +131,11 @@ class WidgetToolboxNotebook:
         self.handles.remove_selected_widget_handles()
         # print(len(self.widgets))
         # self.deselect_selected_widget()
-        self.widget_in_toolbox_chosen = None
-        self.pyted_core.user_frame.after(300, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
+        self.pyted_core.widget_in_toolbox_chosen = None
+        self.toolbox_notebook.after(500, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
 
     # called when pointer button clicked in toolbox
     def toolbox_pointer_button_click(self, _event):
-        self.widget_in_toolbox_chosen = None
+        self.pyted_core.widget_in_toolbox_chosen = None
         # print('toolbox pointer button clicked', event.x, event.y)
         # self.deselect_selected_widget()

@@ -192,6 +192,7 @@ class PytedContainerWidget(PytedWidget):
 
     """
 
+
 @dataclass()
 class PytedGridContainerWidget(PytedWidget):
     """Parent class for pyted container widgets that use grid layout
@@ -582,7 +583,7 @@ class Notebook(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=ttk.Notebook, init=False)
-    # tab: str = field(default='ttk', init=False)
+    tab: str = field(default='ttk', init=False)
     label: str = field(default='Notebook', init=False)
 
     # instance attributes

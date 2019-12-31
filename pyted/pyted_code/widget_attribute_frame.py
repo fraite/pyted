@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from pyted.pyted_code.pyted_core import PytedCore
 
 
-
 class AttributeFrame:
     """Widget attribute frame
 
