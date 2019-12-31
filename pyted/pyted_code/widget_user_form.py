@@ -41,9 +41,9 @@ class UserForm:
             self.user_frame.destroy()
         self.user_frame = ttk.Frame(self.pyted_core.background_user_frame)
         self.user_frame.bind("<Motion>", self.user_motion_callback)
-        self.user_frame.bind("<Button-1>", self.pyted_core.empty_label_click_callback)
-        self.user_frame.bind("<ButtonRelease-1>", self.pyted_core.widget_release)
-        self.user_frame.bind('<Leave>', self.pyted_core.user_frame_leave_callback)
+        self.user_frame.bind("<Button-1>", self.empty_label_click_callback)
+        self.user_frame.bind("<ButtonRelease-1>", self.widget_release)
+        self.user_frame.bind('<Leave>', self.user_frame_leave_callback)
         self.user_frame.grid(row=0, column=0)
         pyte_widget.tk_name = self.user_frame
 
@@ -100,7 +100,7 @@ class UserForm:
                        event, arg1=self.widgets.find_pyte_widget_from_tk(container):
                        self.widget_click(event, arg1)
                        )
-        new_label.bind("<ButtonRelease-1>", self.pyted_core.widget_release)
+        new_label.bind("<ButtonRelease-1>", self.widget_release)
         self.filler_labels.append(new_label)
 
     def place_pyte_widget(self, pyte_widget: pyted_widget_types.PytedPlacedWidget, tk_frame=None,
@@ -235,7 +235,7 @@ class UserForm:
                                event, arg1=pyte_widget:
                                self.widget_click(event, arg1)
                                )
-            tk_new_widget.bind("<ButtonRelease-1>", self.pyted_core.widget_release)
+            tk_new_widget.bind("<ButtonRelease-1>", self.widget_release)
         else:
             tk_new_widget.bind('<Motion>', self.user_motion_callback)
             # tk_new_widget.bind("<B1-Motion>", self.widget_move)
@@ -243,7 +243,7 @@ class UserForm:
                                event, arg1=pyte_widget:
                                self.widget_click(event, arg1)
                                )
-            tk_new_widget.bind("<ButtonRelease-1>", self.pyted_core.widget_release)
+            tk_new_widget.bind("<ButtonRelease-1>", self.widget_release)
         return tk_new_widget
 
     def empty_tk_container_widget(self, parent_pyte_widget: pyted_widget_types.PytedGridContainerWidget) -> None:
@@ -310,14 +310,14 @@ class UserForm:
                             new_label = ttk.Label(self.proposed_widget, text=FILLER_TEXT)
                             new_label.grid(row=i_row, column=i_column)
                             new_label.bind("<Motion>", self.user_motion_callback)
-                            new_label.bind("<Button-1>", self.pyted_core.inserted_widget_click)
+                            new_label.bind("<Button-1>", self.inserted_widget_click)
                             # new_label.bind("<ButtonRelease-1>", self.widget_release)
                             self.filler_labels.append(new_label)
                     # self.proposed_widget.grid(column=grid_location[0], row=grid_location[1])
                     frame.tk_name.add(self.proposed_widget)
                     frame.tk_name.select(self.proposed_widget)
                     self.proposed_widget.bind('<Motion>', self.user_motion_callback)
-                    self.proposed_widget.bind('<Button-1>', self.pyted_core.inserted_widget_click)
+                    self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
 
             # insert a widget if there is a label widget
             elif self.proposed_widget_location != grid_location or self.proposed_widget_frame != frame:
@@ -347,7 +347,7 @@ class UserForm:
                                     new_label = ttk.Label(self.proposed_widget, text=FILLER_TEXT)
                                     new_label.grid(row=i_row, column=i_column)
                                     new_label.bind("<Motion>", self.user_motion_callback)
-                                    new_label.bind("<Button-1>", self.pyted_core.inserted_widget_click)
+                                    new_label.bind("<Button-1>", self.inserted_widget_click)
                                     # new_label.bind("<ButtonRelease-1>", self.widget_release)
                                     self.filler_labels.append(new_label)
                         elif self.pyted_core.widget_in_toolbox_chosen is pyted_widget_types.Notebook:
@@ -366,7 +366,7 @@ class UserForm:
                                     new_label = ttk.Label(self.proposed_widget_tab, text=FILLER_TEXT)
                                     new_label.grid(row=i_row, column=i_column)
                                     new_label.bind("<Motion>", self.user_motion_callback)
-                                    new_label.bind("<Button-1>", self.pyted_core.inserted_widget_click)
+                                    new_label.bind("<Button-1>", self.inserted_widget_click)
                                     # new_label.bind("<ButtonRelease-1>", self.widget_release)
                                     self.filler_labels.append(new_label)
                             self.proposed_widget.add(self.proposed_widget_tab, text='tab 1')
@@ -384,7 +384,7 @@ class UserForm:
 
                         self.proposed_widget.grid(column=grid_location[0], row=grid_location[1])
                         self.proposed_widget.bind('<Motion>', self.user_motion_callback)
-                        self.proposed_widget.bind('<Button-1>', self.pyted_core.inserted_widget_click)
+                        self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
 
                         widget_under_mouse.destroy()
                         # print('new inserted widget x, y', event.x_root, event.y_root, grid_location)
@@ -416,6 +416,39 @@ class UserForm:
             return "break"
         elif (self.pyted_core.widget_in_toolbox_chosen is pyted_widget_types.Frame and
               isinstance(pyte_widget, pyted_widget_types.Notebook)):
-            self.pyted_core. insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
-                                           self.proposed_widget_frame,
-                                           [0, 0])
+            self.pyted_core.insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
+                                          self.proposed_widget_frame,
+                                          [0, 0])
+
+    # called when a (not filler) widget released using pointer
+    def widget_release(self, _event):
+        # print("widget release:", event.x_root, event.y_root)
+        self.mouse_button1_pressed = False
+        if self.widget_to_deselect_if_not_moved is None:
+            # no widget selected so selecting a widget, or not in mouse pointer mode
+            pass
+        else:
+            pass
+            # widget already selected but deselect widget function commented out
+            # self.deselect_selected_widget()
+        return "break"
+
+    # called when filler label clicked using pointer
+    def empty_label_click_callback(self, event):
+        """Select parent container if filler label clicked"""
+        frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
+        self.pyted_core.select_widget(frame)
+
+    def user_frame_leave_callback(self, _event):
+        if self.proposed_widget is not None and self.proposed_widget_location is not None:
+            self.new_filler_label(self.proposed_widget_frame.tk_name,
+                                  self.proposed_widget_location[0], self.proposed_widget_location[1])
+            self.proposed_widget.destroy()
+            self.proposed_widget_frame = None
+            self.proposed_widget_location = None
+
+    def inserted_widget_click(self, _event):
+        # print('new widget', _event.x, _event.y, self.proposed_widget)
+        self.pyted_core.insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
+                           self.proposed_widget_frame,
+                           self.proposed_widget_location)

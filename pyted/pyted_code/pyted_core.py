@@ -251,19 +251,6 @@ class PytedCore:
             raise Exception(f'attr_template "{attr_template}" not yet configured')
             # print(f'attr_template {attr_template} not yet implemented for {attr}')
 
-    # called when a (not filler) widget released using pointer
-    def widget_release(self, _event):
-        # print("widget release:", event.x_root, event.y_root)
-        self.user_form.mouse_button1_pressed = False
-        if self.user_form.widget_to_deselect_if_not_moved is None:
-            # no widget selected so selecting a widget, or not in mouse pointer mode
-            pass
-        else:
-            pass
-            # widget already selected but deselect widget function commented out
-            # self.deselect_selected_widget()
-        return "break"
-
     def widget_move(self, event):
         # called when a (not filler) widget in user form is attempted to be moved
         if self.widget_in_toolbox_chosen is None and self.selected_widget is not None:
@@ -376,12 +363,6 @@ class PytedCore:
         # self.update_navigator_tree()
         self.navigator_tree_obj.navigator_tree_select_item()
 
-    # called when filler label clicked using pointer
-    def empty_label_click_callback(self, event):
-        """Select parent container if filler label clicked"""
-        frame, grid_location = self.user_form.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
-        self.select_widget(frame)
-
     def deselect_selected_widget(self) -> None:
         """
         Deselect the selected widget
@@ -435,20 +416,6 @@ class PytedCore:
         self.widgets.widget_list.remove(widget_to_delete)
         self.navigator_tree_obj.build_navigator_tree()
 
-    def user_frame_leave_callback(self, _event):
-        if self.user_form.proposed_widget is not None and self.user_form.proposed_widget_location is not None:
-            self.user_form.new_filler_label(self.user_form.proposed_widget_frame.tk_name,
-                                  self.user_form.proposed_widget_location[0], self.user_form.proposed_widget_location[1])
-            self.user_form.proposed_widget.destroy()
-            self.user_form.proposed_widget_frame = None
-            self.user_form.proposed_widget_location = None
-
-    def inserted_widget_click(self, _event):
-        # print('new widget', _event.x, _event.y, self.proposed_widget)
-        self.insert_widget(self.widget_in_toolbox_chosen(), self.user_form.proposed_widget,
-                           self.user_form.proposed_widget_frame,
-                           self.user_form.proposed_widget_location)
-
     def insert_widget(self, new_widget, proposed_widget, proposed_widget_frame, proposed_widget_location):
         # new_widget = self.widget_in_toolbox_chosen()
         new_widget.parent = proposed_widget_frame.name
@@ -468,7 +435,7 @@ class PytedCore:
                                 w_event, arg1=new_widget:
                                 self.user_form.widget_click(w_event, arg1)
                                 )
-        new_widget.tk_name.bind("<ButtonRelease-1>", self.widget_release)
+        new_widget.tk_name.bind("<ButtonRelease-1>", self.user_form.widget_release)
 
         if isinstance(new_widget, pyted_widget_types.Frame):
             new_widget.number_columns = pyted_widget_types.Frame.number_columns
@@ -476,8 +443,8 @@ class PytedCore:
             # replace binding for filler labels from proposed container filler labels to an inserted container type
             for filler_label in proposed_widget.grid_slaves():
                 filler_label.bind("<Motion>", self.user_form.user_motion_callback)
-                filler_label.bind("<Button-1>", self.empty_label_click_callback)
-                filler_label.bind("<ButtonRelease-1>", self.widget_release)
+                filler_label.bind("<Button-1>", self.user_form.empty_label_click_callback)
+                filler_label.bind("<ButtonRelease-1>", self.user_form.widget_release)
 
         self.widgets.widget_list.append(new_widget)
         self.navigator_tree_obj.build_navigator_tree()
@@ -513,7 +480,6 @@ class PytedCore:
 
     def menu_file_load(self):
         root = self.root_window
-        print(self.root_window)
         root.filename = filedialog.askopenfilename(initialfile='ddd.py', title="Select file",
                                                    filetypes=(("python files", "*.py"), ("all files", "*.*")))
         if not root.filename == '':
