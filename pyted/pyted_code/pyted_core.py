@@ -461,8 +461,8 @@ class PytedCore:
         if not self.widget_toolbox.widget_in_toolbox_chosen_double_click:
             self.widget_in_toolbox_chosen = None
             self.user_form.user_frame.after(30, lambda: self.widget_toolbox.widget_in_toolbox_chosen_tk_var.set('pointer'))
+        self.select_widget(new_widget)
         # by return "break" we stop further event handling, which stops the inserted widget being active
-        # self.select_widget(new_widget)
         # return "break"
 
     def menu_file_save(self):

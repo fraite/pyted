@@ -90,6 +90,10 @@ class WidgetToolboxNotebook:
                                             event, arg1=obj:
                                             self.toolbox_button_release_callback(event, arg1)
                                             )
+                            new_button.bind("<Button-1>", lambda
+                                            event, arg1=obj:
+                                            self.toolbox_button_click_callback(event, arg1)
+                                            )
                             new_button.bind("<Double-Button-1>", lambda
                                             event, arg1=obj:
                                             self.toolbox_button_double_click_callback(event, arg1)
@@ -104,19 +108,20 @@ class WidgetToolboxNotebook:
                     except AttributeError:
                         pass
 
-    # called when button in toolbox clicked
+    def toolbox_button_click_callback(self, _event, _tk_widget_obj):
+        self.widget_in_toolbox_chosen_double_click = False
+
+    # called when button in toolbox released
     def toolbox_button_release_callback(self, _event, tk_widget_obj):
         self.pyted_core.deselect_selected_widget()
         self.pyted_core.widget_in_toolbox_chosen = tk_widget_obj
-        self.widget_in_toolbox_chosen_double_click = False
-        # print(tk_widget_obj)
 
     # called when button in toolbox double clicked
-    # TODO: Double click not working anymore
     def toolbox_button_double_click_callback(self, _event, tk_widget_obj):
         self.pyted_core.deselect_selected_widget()
         self.pyted_core.widget_in_toolbox_chosen = tk_widget_obj
         self.widget_in_toolbox_chosen_double_click = True
+        print(self.widget_in_toolbox_chosen_double_click)
 
     # called when var button in toolbox clicked
     def toolbox_var_button_release_callback(self, _event, tk_widget_obj):
