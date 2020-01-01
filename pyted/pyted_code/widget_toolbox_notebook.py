@@ -81,12 +81,12 @@ class WidgetToolboxNotebook:
                         except AttributeError:
                             is_var = False
                         if is_var:
-                            new_button.bind("<ButtonRelease>", lambda
+                            new_button.bind("<ButtonRelease-1>", lambda
                                             event, arg1=obj:
                                             self.toolbox_var_button_release_callback(event, arg1)
                                             )
                         else:
-                            new_button.bind("<ButtonRelease>", lambda
+                            new_button.bind("<ButtonRelease-1>", lambda
                                             event, arg1=obj:
                                             self.toolbox_button_release_callback(event, arg1)
                                             )

@@ -15,7 +15,7 @@ from pyted.pyted_code.widget_user_form import UserForm
 
 FILLER_TEXT = '        .        '
 Pyted_Widget_Type = Union[pyted_widget_types.PytedWidget, pyted_widget_types.PytedGridContainerWidget,
-                          pyted_widget_types.PytedPlacedWidget]
+                          pyted_widget_types.PytedPlacedWidget, None]
 # update is_pyte_container if Pyte_Container_Type changed
 Pyted_Container_Type = Union[pyted_widget_types.TopLevel, pyted_widget_types.Frame]
 
@@ -36,7 +36,7 @@ class PytedCore:
         self.user_form = UserForm(self)
         parent_pyte_widget = self.user_form.draw_user_frame()
 
-        self.selected_widget = None
+        self.selected_widget: Pyted_Widget_Type = None
         self.widget_in_toolbox_chosen = None
 
         self.handles = Handles(self.root_window)
