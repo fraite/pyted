@@ -252,7 +252,8 @@ class PytedCore:
 
     def widget_move(self, event):
         # called when a (not filler) widget in user form is attempted to be moved
-        if self.widget_in_toolbox_chosen is None and self.selected_widget is not None:
+        if (self.widget_in_toolbox_chosen is None and self.selected_widget is not None and
+                not isinstance(self.selected_widget, pyted_widget_types.TopLevel)):
             # mouse pointer mode chosen from widget toolbox
             self.user_form.widget_to_deselect_if_not_moved = None
             # x_location = event.x_root - self.user_form.user_frame.winfo_rootx()

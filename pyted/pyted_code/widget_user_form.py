@@ -281,7 +281,7 @@ class UserForm:
         :return: None
         """
         if self.pyted_core.widget_in_toolbox_chosen is None:
-            # print('<<<<', self.selected_widget.name, self.mouse_button1_pressed)
+            # print('<<<<', self.pyted_core.selected_widget.name, self.mouse_button1_pressed)
             if self.pyted_core.selected_widget is not None and self.mouse_button1_pressed:
                 # selection widget chosen so may need to move widget
                 self.pyted_core.widget_move(event)
@@ -436,6 +436,7 @@ class UserForm:
     # called when filler label clicked using pointer
     def empty_label_click_callback(self, event):
         """Select parent container if filler label clicked"""
+        self.mouse_button1_pressed = True
         frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
         self.pyted_core.select_widget(frame)
 
