@@ -14,9 +14,8 @@ from pyted.pyted_code.widget_navigator_tree import NavigatorTree
 from pyted.pyted_code.widget_user_form import UserForm
 
 FILLER_TEXT = '        .        '
-Pyted_Widget_Type = Union[pyted_widget_types.Project, pyted_widget_types.StringVar,
-                          pyted_widget_types.TopLevel, pyted_widget_types.Label, pyted_widget_types.Entry,
-                          pyted_widget_types.Frame, pyted_widget_types.Button, pyted_widget_types.Checkbutton]
+Pyted_Widget_Type = Union[pyted_widget_types.PytedWidget, pyted_widget_types.PytedGridContainerWidget,
+                          pyted_widget_types.PytedPlacedWidget]
 # update is_pyte_container if Pyte_Container_Type changed
 Pyted_Container_Type = Union[pyted_widget_types.TopLevel, pyted_widget_types.Frame]
 
@@ -58,7 +57,7 @@ class PytedCore:
         self.root_window.mainloop()
         # self.toolbox = None
 
-    def update_widget_attribute(self, pyte_widget: pyted_widget_types.PytedPlacedWidget, attr: str,
+    def update_widget_attribute(self, pyte_widget: Pyted_Widget_Type, attr: str,
                                 new_value: Union[str, bool],
                                 init=False) -> Union[None, tuple]:
         """Update a widget attribute with a new value
@@ -110,8 +109,8 @@ class PytedCore:
                 return
             new_attr_val = getattr(pyte_widget, attr)
             new_position[attr] = new_attr_val
-            if (int(new_position['row']) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_rows) or
-                    int(new_position['column']) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_columns)):
+            if (int(new_position['row']) >= int(self.widgets.find_pyte_parent(pyte_widget).number_rows) or
+                    int(new_position['column']) >= int(self.widgets.find_pyte_parent(pyte_widget).number_columns)):
                 # pyte_widget.row = old_position['row']
                 # pyte_widget.column = old_position['column']
                 pyte_widget.remove = True
@@ -170,8 +169,8 @@ class PytedCore:
                 # remove attribute is false, if widget not displayed then try to display it
                 if not tk_widget_in_grid:
                     # check that the widget is on the grid
-                    if (int(pyte_widget.row) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_rows) or
-                            int(pyte_widget.column) >= int(self.widgets.find_pyte_widget(pyte_widget.parent).number_columns)):
+                    if (int(pyte_widget.row) >= int(self.widgets.find_pyte_parent(pyte_widget).number_rows) or
+                            int(pyte_widget.column) >= int(self.widgets.find_pyte_parent(pyte_widget).number_columns)):
                         messagebox.showwarning('Widget off grid',
                                                'Row or column greater than grid size. '
                                                'To get widget back move back onto grid and set remove to false')

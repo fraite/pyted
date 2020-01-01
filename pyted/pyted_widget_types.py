@@ -63,7 +63,7 @@ def make_empty_dict():
     return {}
 
 
-@dataclass()
+@dataclass
 class PytedWidget:
     """
     Base dataclass for all Pyted widgets.
@@ -85,8 +85,7 @@ class PytedWidget:
     Class fields split into class fields that remain the same for all widgets of the same class, and instance fields
     that hold specific information for each widget. The class fields are:
 
-    * type: the tkinter class of the widget. This field is over-ridden by all widgets but is included to prevent lint
-            type checking errors
+    * type: the tkinter class of the widget.
 
     The instance fields are:
 
@@ -186,18 +185,24 @@ class PytedWidget:
             return attr_dict[template]
 
 
-@dataclass()
+@dataclass
 class PytedContainerWidget(PytedWidget):
     """Parent class for pyted container widgets
 
     """
 
+    type: type = field(default='PytedContainerWidget', init=False)
+    # TODO: remove when PyCharm works; the next line not really needed but PyCharm complains if no new field is defined
+    name: str = field(default=None, metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
 
-@dataclass()
-class PytedGridContainerWidget(PytedWidget):
+
+@dataclass
+class PytedGridContainerWidget(PytedContainerWidget):
     """Parent class for pyted container widgets that use grid layout
 
     """
+
+    type: type = field(default='PytedGridContainerWidget', init=False)
 
     # instance attributes
     number_columns: int = field(default=2, metadata={'type': SINGLE_INPUT, 'template': GRID_SIZE_CODE, 'options': None})
@@ -296,7 +301,7 @@ class PytedGridContainerWidget(PytedWidget):
         self._col_configure[col] = col_config
 
 
-@dataclass()
+@dataclass
 class PytedPlacedWidget(PytedWidget):
     """Parent class for placed pyted widgets
 
@@ -310,7 +315,7 @@ class PytedPlacedWidget(PytedWidget):
                                                   'options': (True, False)})
 
 
-@dataclass()
+@dataclass
 class Project(PytedWidget):
     """Data for TopLevel widget
 
@@ -338,7 +343,7 @@ class Project(PytedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class StringVar(PytedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -355,7 +360,7 @@ class StringVar(PytedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class TopLevel(PytedGridContainerWidget):
     """Data for TopLevel widget
 
@@ -388,7 +393,7 @@ class TopLevel(PytedGridContainerWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class Label(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -413,7 +418,7 @@ class Label(PytedPlacedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class Entry(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -438,7 +443,7 @@ class Entry(PytedPlacedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class Button(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -462,7 +467,7 @@ class Button(PytedPlacedWidget):
 #
 # TTK Radiobutton
 #
-@dataclass()
+@dataclass
 class Radiobutton(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -489,7 +494,7 @@ class Radiobutton(PytedPlacedWidget):
 #
 # TTK Checkbutton
 #
-@dataclass()
+@dataclass
 class Checkbutton(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -517,7 +522,7 @@ class Checkbutton(PytedPlacedWidget):
 #
 # TTK Frame
 #
-@dataclass()
+@dataclass
 class Frame(PytedGridContainerWidget, PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -536,7 +541,7 @@ class Frame(PytedGridContainerWidget, PytedPlacedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class TtkLabel(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -557,7 +562,7 @@ class TtkLabel(PytedPlacedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class TtkEntry(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -578,7 +583,7 @@ class TtkEntry(PytedPlacedWidget):
         return code
 
 
-@dataclass()
+@dataclass
 class Notebook(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
@@ -587,10 +592,7 @@ class Notebook(PytedPlacedWidget):
     label: str = field(default='Notebook', init=False)
 
     # instance attributes
-    # state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
-    #                                                      'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
-    # height: str = field(default='75', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
-    # width: str = field(default='100', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    tk_name: ttk.Notebook = field(default=None, metadata={'type': NO_INPUT, 'template': BESPOKE_CODE, 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Notebook(self.{self.parent})\n'
