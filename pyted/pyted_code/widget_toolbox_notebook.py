@@ -137,7 +137,7 @@ class WidgetToolboxNotebook:
         # print(len(self.widgets))
         # self.deselect_selected_widget()
         self.pyted_core.widget_in_toolbox_chosen = None
-        self.toolbox_notebook.after(500, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
+        self.toolbox_notebook.after(300, lambda: self.widget_in_toolbox_chosen_tk_var.set('pointer'))
 
     # called when pointer button clicked in toolbox
     def toolbox_pointer_button_click(self, _event):
