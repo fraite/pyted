@@ -451,5 +451,5 @@ class UserForm:
     def inserted_widget_click(self, _event):
         # print('new widget', _event.x, _event.y, self.proposed_widget)
         self.pyted_core.insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
-                           self.proposed_widget_frame,
-                           self.proposed_widget_location)
+                                      self.proposed_widget_frame,
+                                      self.proposed_widget_location)

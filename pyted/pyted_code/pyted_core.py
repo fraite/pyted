@@ -117,7 +117,7 @@ class PytedCore:
                 pyte_widget.tk_name.grid_remove()
                 self.handles.remove_selected_widget_handles()
                 self.user_form.new_filler_label(self.widgets.find_tk_parent(pyte_widget),
-                                      old_position['column'], old_position['row'])
+                                                old_position['column'], old_position['row'])
                 messagebox.showwarning('Widget being moved off grid',
                                        'Row or column greater than grid size. Widget has been removed. '
                                        'To get widget back move back onto grid and set remove to false')
@@ -259,7 +259,8 @@ class PytedCore:
             # x_location = event.x_root - self.user_form.user_frame.winfo_rootx()
             # y_location = event.y_root - self.user_form.user_frame.winfo_rooty()
             # grid_location = self.user_form.user_frame.grid_location(x_location, y_location)
-            frame, grid_location = self.user_form.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
+            frame, grid_location = self.user_form.find_grid_location(self.widgets.find_top_widget(), event.x_root,
+                                                                     event.y_root)
             if self.selected_widget.type == tkinter.Toplevel:
                 selected_widget_current_row = None
                 selected_widget_current_column = None
@@ -303,7 +304,7 @@ class PytedCore:
                 # put a new filler label at the old position where the widget was
                 # print('>>>>>>>>>>>>', self.selected_widget.name, self.selected_widget_current_column)
                 self.user_form. new_filler_label(selected_widget_current_frame.tk_name, selected_widget_current_column,
-                                      selected_widget_current_row)
+                                                 selected_widget_current_row)
 
                 # remove filler label from where the widget will move to
                 self.user_form.filler_labels.remove(widget_under_mouse)
@@ -312,7 +313,7 @@ class PytedCore:
                 # move tk_widget, note have to destroy and re-create as you can not move tk_widgets between frames
                 self.selected_widget.tk_name.destroy()
                 clone = self.user_form.place_pyte_widget(self.selected_widget, tk_frame=frame.tk_name,
-                                               column=grid_location[0], row=grid_location[1])
+                                                         column=grid_location[0], row=grid_location[1])
                 if isinstance(self.selected_widget, pyted_widget_types.Frame):
                     self.user_form.fill_tk_container_widget(self.selected_widget)
 
@@ -381,7 +382,8 @@ class PytedCore:
         self.widget_toolbox.pointer_button.invoke()
         if self.user_form.proposed_widget is not None and self.user_form.proposed_widget_location is not None:
             self.user_form.new_filler_label(self.user_form.proposed_widget_frame.tk_name,
-                                  self.user_form.proposed_widget_location[0], self.user_form.proposed_widget_location[1])
+                                            self.user_form.proposed_widget_location[0],
+                                            self.user_form.proposed_widget_location[1])
             self.user_form.proposed_widget.destroy()
             self.user_form.proposed_widget_frame = None
             self.user_form.proposed_widget_location = None
@@ -411,7 +413,7 @@ class PytedCore:
         widget_to_delete = self.selected_widget
         self.deselect_selected_widget()
         self.user_form.new_filler_label(self.widgets.find_tk_parent(widget_to_delete), widget_to_delete.column,
-                              widget_to_delete.row)
+                                        widget_to_delete.row)
         widget_to_delete.tk_name.destroy()
         self.widgets.widget_list.remove(widget_to_delete)
         self.navigator_tree_obj.build_navigator_tree()
@@ -461,7 +463,8 @@ class PytedCore:
 
         if not self.widget_toolbox.widget_in_toolbox_chosen_double_click:
             self.widget_in_toolbox_chosen = None
-            self.user_form.user_frame.after(30, lambda: self.widget_toolbox.widget_in_toolbox_chosen_tk_var.set('pointer'))
+            self.user_form.user_frame.after(30,
+                                            lambda: self.widget_toolbox.widget_in_toolbox_chosen_tk_var.set('pointer'))
         self.select_widget(new_widget)
         # by return "break" we stop further event handling, which stops the inserted widget being active
         # return "break"
