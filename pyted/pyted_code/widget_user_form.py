@@ -41,7 +41,10 @@ class UserForm:
             self.user_frame.destroy()
         self.user_frame = ttk.Frame(self.pyted_core.background_user_frame)
         self.user_frame.bind("<Motion>", self.user_motion_callback)
-        self.user_frame.bind("<Button-1>", self.empty_label_click_callback)
+        self.user_frame.bind("<Button-1>", lambda
+                             event, arg1=pyte_widget:
+                             self.widget_click(event, arg1)
+                             )
         self.user_frame.bind("<ButtonRelease-1>", self.widget_release)
         self.user_frame.bind('<Leave>', self.user_frame_leave_callback)
         self.user_frame.grid(row=0, column=0)
@@ -397,7 +400,7 @@ class UserForm:
                     self.new_filler_label(old_proposed_widget_frame.tk_name,
                                           old_proposed_widget_location[0], old_proposed_widget_location[1])
 
-    # called when a widget clicked using pointer
+    # called when a widget or empty label clicked using pointer
     def widget_click(self, _event, pyte_widget):
         self.mouse_button1_pressed = True
         if self.pyted_core.widget_in_toolbox_chosen is None:
@@ -413,7 +416,7 @@ class UserForm:
             else:
                 # may need to deselect widget if mouse not moved
                 self.widget_to_deselect_if_not_moved = pyte_widget
-            return "break"
+            return
         elif (self.pyted_core.widget_in_toolbox_chosen is pyted_widget_types.Frame and
               isinstance(pyte_widget, pyted_widget_types.Notebook)):
             self.pyted_core.insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
@@ -432,13 +435,6 @@ class UserForm:
             # widget already selected but deselect widget function commented out
             # self.deselect_selected_widget()
         return "break"
-
-    # called when filler label clicked using pointer
-    def empty_label_click_callback(self, event):
-        """Select parent container if filler label clicked"""
-        self.mouse_button1_pressed = True
-        frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
-        self.pyted_core.select_widget(frame)
 
     def user_frame_leave_callback(self, _event):
         if self.proposed_widget is not None and self.proposed_widget_location is not None:

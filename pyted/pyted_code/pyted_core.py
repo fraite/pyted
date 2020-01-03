@@ -332,7 +332,6 @@ class PytedCore:
                 # print('end move widget')
 
     def select_widget(self, new_selected_pyte_widget) -> None:
-        # print('new select widget: ', new_selected_pyte_widget.name)
         self.selected_widget = new_selected_pyte_widget
 
         # place widget handles if required
@@ -445,7 +444,10 @@ class PytedCore:
             # replace binding for filler labels from proposed container filler labels to an inserted container type
             for filler_label in proposed_widget.grid_slaves():
                 filler_label.bind("<Motion>", self.user_form.user_motion_callback)
-                filler_label.bind("<Button-1>", self.user_form.empty_label_click_callback)
+                filler_label.bind("<Button-1>", lambda
+                                  event, arg1=new_widget:
+                                  self.user_form.widget_click(event, arg1)
+                                  )
                 filler_label.bind("<ButtonRelease-1>", self.user_form.widget_release)
 
         self.widgets.widget_list.append(new_widget)
