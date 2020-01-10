@@ -2,7 +2,7 @@
 import inspect
 import importlib.resources as pkg_resources
 
-from pyted import pyted_widget_types
+from pyted import monet_widget_types
 
 
 def generate_code(widgets) -> str:
@@ -100,7 +100,7 @@ def generate_code(widgets) -> str:
 def build_binder_class(code, widgets):
     # generate StringVar in init
     for pyte_widget in widgets:
-        if isinstance(pyte_widget, pyted_widget_types.StringVar):
+        if isinstance(pyte_widget, monet_widget_types.StringVar):
             code = code + f'        self.{pyte_widget.name} = "{pyte_widget.set}"\n'
     code = code + '\n'
     # generate event methods
@@ -124,7 +124,7 @@ def place_widgets(code, parent_widget_name, widgets):
             code = code + f'        # new_widget({pyte_widget.label})\n'
             code = code + f'        ' + pyte_widget.generate_code()
             # add rowconfigure and columnconfigure code for container widgets
-            if isinstance(pyte_widget, pyted_widget_types.PytedGridContainerWidget):
+            if isinstance(pyte_widget, monet_widget_types.PytedGridContainerWidget):
                 for row, row_config in pyte_widget.get_row_configuration().items():
                     code = code + f'        self.{pyte_widget.name}.rowconfigure({row}'
                     for attr, v in row_config.items():
@@ -138,24 +138,24 @@ def place_widgets(code, parent_widget_name, widgets):
             # add code for each attribute using attr_template to select template
             for attr, v in pyte_widget.get_code_template().items():
                 attr_template = pyte_widget.get_code_template(attr)
-                if attr_template == pyted_widget_types.CONFIG_CODE:
+                if attr_template == monet_widget_types.CONFIG_CODE:
                     attr_value = getattr(pyte_widget, attr)
                     if attr == 'textvariable' or attr == 'variable':
                         if attr_value != '':
                             code = code + f'        self.{pyte_widget.name}.config({attr}=self.{attr_value})\n'
                     else:
                         code = code + f'        self.{pyte_widget.name}.config({attr}="{attr_value}")\n'
-                elif attr_template == pyted_widget_types.GRID_CODE:
+                elif attr_template == monet_widget_types.GRID_CODE:
                     attr_value = getattr(pyte_widget, attr)
                     code = code + f'        self.{pyte_widget.name}.grid({attr}="{attr_value}")\n'
-                elif attr_template == pyted_widget_types.GRID_SIZE_CODE:
+                elif attr_template == monet_widget_types.GRID_SIZE_CODE:
                     attr_value = getattr(pyte_widget, attr)
                     code = code + f'        # self.{pyte_widget.name}.grid_size({attr}="{attr_value}")\n'
-                elif attr_template == pyted_widget_types.TITLE_CODE:
+                elif attr_template == monet_widget_types.TITLE_CODE:
                     attr_value = getattr(pyte_widget, attr)
                     code = code + f'        self.{pyte_widget.name}.title("{attr_value}")\n'
 
-                elif attr_template == pyted_widget_types.GRID_CODE:
+                elif attr_template == monet_widget_types.GRID_CODE:
                     pass
                     # if self.selected_widget is None:
                     #     # not moving widget
@@ -166,11 +166,11 @@ def place_widgets(code, parent_widget_name, widgets):
                     # else:
                     #     # TODO: implement grid moving
                     #     print('trying to move grid, or resize grid, but not implemented')
-                elif attr_template == pyted_widget_types.BESPOKE_CODE and attr == 'remove':
+                elif attr_template == monet_widget_types.BESPOKE_CODE and attr == 'remove':
                     attr_value = getattr(pyte_widget, attr)
                     if attr_value:
                         code = code + f'        self.{pyte_widget.name}.grid_remove()\n'
-                elif attr_template == pyted_widget_types.VAR_SET_CODE:
+                elif attr_template == monet_widget_types.VAR_SET_CODE:
                     code = code + f'        self.{pyte_widget.name}.set("{pyte_widget.set}")\n'
                     code = code + f'        init_tk_var(self.{pyte_widget.name}, gui_binder,' \
                                   f' "{pyte_widget.name}")\n'
@@ -182,8 +182,8 @@ def place_widgets(code, parent_widget_name, widgets):
                         code = code + f'            self.{pyte_widget.name}.bind("{attr_template}", lambda\n' \
                                       f'                             event, arg1=self.{pyte_widget.name}:\n' \
                                       f'                             gui_binder.{event_method}(event, arg1))\n'
-            if isinstance(pyte_widget, pyted_widget_types.PytedGridContainerWidget) or\
-                    isinstance(pyte_widget, pyted_widget_types.Project):
+            if isinstance(pyte_widget, monet_widget_types.PytedGridContainerWidget) or\
+                    isinstance(pyte_widget, monet_widget_types.Project):
                 code = place_widgets(code, pyte_widget.name, widgets)
     return code
 
@@ -282,7 +282,7 @@ def parse_code(f):
         pass
     else:
         raise Exception('project widget not set up correctly')
-    widget = pyted_widget_types.Project()
+    widget = monet_widget_types.Project()
     widget.name = current_class
     widgets.append(widget)
 
@@ -292,7 +292,7 @@ def parse_code(f):
     while not current_line2.startswith('# new_widget(Toplevel)'):
         if current_line2.startswith('# new_widget('):
             widget_label = current_line2[13:-1]
-            for name, obj in inspect.getmembers(pyted_widget_types):
+            for name, obj in inspect.getmembers(monet_widget_types):
                 if inspect.isclass(obj) and obj:
                     try:
                         obj_label = obj.label
@@ -343,7 +343,7 @@ def parse_code(f):
     else:
         raise Exception('line to create toplevel does not start with self.')
 
-    widget = pyted_widget_types.TopLevel()
+    widget = monet_widget_types.TopLevel()
     widget.name = toplevel_name
     widget.comment = comment
     # read in top level widget attributes
@@ -356,34 +356,34 @@ def parse_code(f):
             if current_line2.startswith('# '):
                 current_line2 = current_line2[2:]
             current_line2 = current_line2[len('self.' + toplevel_name + '.'):]
-            if current_line2.startswith(pyted_widget_types.CONFIG_CODE):
-                method_name_length = len(pyted_widget_types.CONFIG_CODE) + 1
+            if current_line2.startswith(monet_widget_types.CONFIG_CODE):
+                method_name_length = len(monet_widget_types.CONFIG_CODE) + 1
                 attr_name = current_line2[method_name_length:-1].split('=')[0]
                 attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
                 setattr(widget, attr_name, attr_value)
-            elif (current_line2.startswith(pyted_widget_types.GRID_CODE) and
-                  not current_line2.startswith(pyted_widget_types.GRID_SIZE_CODE)):
-                method_name_length = len(pyted_widget_types.GRID_CODE) + 1
+            elif (current_line2.startswith(monet_widget_types.GRID_CODE) and
+                  not current_line2.startswith(monet_widget_types.GRID_SIZE_CODE)):
+                method_name_length = len(monet_widget_types.GRID_CODE) + 1
                 attr_name = current_line2[method_name_length:-1].split('=')[0]
                 attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
                 setattr(widget, attr_name, attr_value)
-            elif current_line2.startswith(pyted_widget_types.GRID_SIZE_CODE):
-                method_name_length = len(pyted_widget_types.GRID_SIZE_CODE) + 1
+            elif current_line2.startswith(monet_widget_types.GRID_SIZE_CODE):
+                method_name_length = len(monet_widget_types.GRID_SIZE_CODE) + 1
                 attr_name = current_line2[method_name_length:-1].split('=')[0]
                 attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
                 setattr(widget, attr_name, attr_value)
-            elif current_line2.startswith(pyted_widget_types.TITLE_CODE):
+            elif current_line2.startswith(monet_widget_types.TITLE_CODE):
                 widget.window_title = current_line2[7:-2]
-            elif current_line2.startswith(pyted_widget_types.ROW_CONFIGURE):
-                current_line2 = current_line2[len(pyted_widget_types.ROW_CONFIGURE) + 1:]
+            elif current_line2.startswith(monet_widget_types.ROW_CONFIGURE):
+                current_line2 = current_line2[len(monet_widget_types.ROW_CONFIGURE) + 1:]
                 row = current_line2.split(',')[0]
                 current_line2 = current_line2[len(row) + 2:-1]
                 for args in current_line2.split(','):
                     attr = args.strip().split('=')[0]
                     val = args.strip().split('=')[1][1:-1]
                     widget.set_row_configuration(row, attr, val)
-            elif current_line2.startswith(pyted_widget_types.COLUMN_CONFIGURE):
-                current_line2 = current_line2[len(pyted_widget_types.COLUMN_CONFIGURE) + 1:]
+            elif current_line2.startswith(monet_widget_types.COLUMN_CONFIGURE):
+                current_line2 = current_line2[len(monet_widget_types.COLUMN_CONFIGURE) + 1:]
                 column = current_line2.split(',')[0]
                 current_line2 = current_line2[len(column) + 2:-1]
                 for args in current_line2.split(','):
@@ -399,7 +399,7 @@ def parse_code(f):
     while not current_line2.startswith('top_level.protocol') and not current_line2.startswith('def'):
         if current_line2.startswith('# new_widget('):
             widget_label = current_line2[13:-1]
-            for name, obj in inspect.getmembers(pyted_widget_types):
+            for name, obj in inspect.getmembers(monet_widget_types):
                 if inspect.isclass(obj) and obj:
                     obj_label = getattr(obj, 'label', None)
                     if widget_label == obj_label:
@@ -437,32 +437,32 @@ def load_widget_attr(f, widget, current_line2):
     # remove self.widget_name. to get tkinter command
     current_line2 = current_line2[len('self.' + widget.name + '.'):]
     # decode tkinger command
-    if current_line2.startswith(pyted_widget_types.CONFIG_CODE + '('):
-        method_name_length = len(pyted_widget_types.CONFIG_CODE) + 1
+    if current_line2.startswith(monet_widget_types.CONFIG_CODE + '('):
+        method_name_length = len(monet_widget_types.CONFIG_CODE) + 1
         attr_name = current_line2[method_name_length:-1].split('=')[0]
         if attr_name == 'textvariable' or attr_name == 'variable':
             attr_value = current_line2[method_name_length:-1].split('=')[1][5:]
         else:
             attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
         setattr(widget, attr_name, attr_value)
-    elif current_line2.startswith(pyted_widget_types.GRID_CODE + '('):
-        method_name_length = len(pyted_widget_types.GRID_CODE) + 1
+    elif current_line2.startswith(monet_widget_types.GRID_CODE + '('):
+        method_name_length = len(monet_widget_types.GRID_CODE) + 1
         attr_name = current_line2[method_name_length:-1].split('=')[0]
         attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
         setattr(widget, attr_name, attr_value)
-    elif current_line2.startswith(pyted_widget_types.GRID_SIZE_CODE + '('):
-        method_name_length = len(pyted_widget_types.GRID_SIZE_CODE) + 1
+    elif current_line2.startswith(monet_widget_types.GRID_SIZE_CODE + '('):
+        method_name_length = len(monet_widget_types.GRID_SIZE_CODE) + 1
         attr_name = current_line2[method_name_length:-1].split('=')[0]
         attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
         setattr(widget, attr_name, attr_value)
-    elif current_line2.startswith(pyted_widget_types.GRID_REMOVE + '('):
+    elif current_line2.startswith(monet_widget_types.GRID_REMOVE + '('):
         setattr(widget, 'remove', True)
-    elif current_line2.startswith(pyted_widget_types.VAR_SET_CODE + '('):
-        method_name_length = len(pyted_widget_types.VAR_SET_CODE) + 1
+    elif current_line2.startswith(monet_widget_types.VAR_SET_CODE + '('):
+        method_name_length = len(monet_widget_types.VAR_SET_CODE) + 1
         attr_value = current_line2[method_name_length+1:-2]
-        setattr(widget, pyted_widget_types.VAR_SET_CODE, attr_value)
-    elif current_line2.startswith(pyted_widget_types.BIND_CODE + '('):
-        method_name_length = len(pyted_widget_types.BIND_CODE) + 1
+        setattr(widget, monet_widget_types.VAR_SET_CODE, attr_value)
+    elif current_line2.startswith(monet_widget_types.BIND_CODE + '('):
+        method_name_length = len(monet_widget_types.BIND_CODE) + 1
         event = current_line2.split(',')[0][method_name_length+1:-1]
         attr_name = widget.get_attr_from_template(event)
         f.readline()  # read and ignore "event, arg1=self." line
@@ -471,16 +471,16 @@ def load_widget_attr(f, widget, current_line2):
         current_line2 = current_line2.split('.')[1]
         bind_function = current_line2.split('(')[0]
         setattr(widget, attr_name, bind_function)
-    elif current_line2.startswith(pyted_widget_types.ROW_CONFIGURE):
-        current_line2 = current_line2[len(pyted_widget_types.ROW_CONFIGURE) + 1:]
+    elif current_line2.startswith(monet_widget_types.ROW_CONFIGURE):
+        current_line2 = current_line2[len(monet_widget_types.ROW_CONFIGURE) + 1:]
         row = current_line2.split(',')[0]
         current_line2 = current_line2[len(row) + 2:-1]
         for args in current_line2.split(','):
             attr = args.strip().split('=')[0]
             val = args.strip().split('=')[1][1:-1]
             widget.set_row_configuration(row, attr, val)
-    elif current_line2.startswith(pyted_widget_types.COLUMN_CONFIGURE):
-        current_line2 = current_line2[len(pyted_widget_types.COLUMN_CONFIGURE) + 1:]
+    elif current_line2.startswith(monet_widget_types.COLUMN_CONFIGURE):
+        current_line2 = current_line2[len(monet_widget_types.COLUMN_CONFIGURE) + 1:]
         column = current_line2.split(',')[0]
         current_line2 = current_line2[len(column) + 2:-1]
         for args in current_line2.split(','):

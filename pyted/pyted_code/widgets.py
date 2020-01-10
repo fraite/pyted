@@ -1,5 +1,5 @@
 import tkinter
-import pyted.pyted_widget_types as pyted_widget_types
+import pyted.monet_widget_types as pyted_widget_types
 
 
 class Widgets:
@@ -36,11 +36,11 @@ class Widgets:
                 pass
         raise Exception('No TopLevel widget defined in project')
 
-    def find_pyte_widget(self, name) -> pyted_widget_types.PytedWidget:
+    def find_pyte_widget_from_m_name(self, m_name) -> pyted_widget_types.PytedWidget:
         for pyte_widget in self.widget_list:
-            if pyte_widget.name == name:
+            if pyte_widget.name == m_name:
                 return pyte_widget
-        raise Exception(f'pyte widget with name {name} can not be found')
+        raise Exception(f'pyte widget with name {m_name} can not be found')
 
     def find_pyte_widget_from_tk(self, tk_name) -> pyted_widget_types.PytedWidget:
         for pyte_widget in self.widget_list:

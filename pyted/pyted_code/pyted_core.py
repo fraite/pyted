@@ -3,7 +3,7 @@ from tkinter import ttk
 from typing import Union
 from tkinter import filedialog, messagebox
 
-import pyted.pyted_widget_types as pyted_widget_types
+import pyted.monet_widget_types as pyted_widget_types
 import pyted.save_load_package.save_load as save_load
 from pyted.pyted_code.widgets import Widgets
 from pyted.pyted_window import PytedWindow
@@ -252,13 +252,11 @@ class PytedCore:
 
     def widget_move(self, event):
         # called when a (not filler) widget in user form is attempted to be moved
-        if (self.widget_in_toolbox_chosen is None and self.selected_widget is not None and
-                not isinstance(self.selected_widget, pyted_widget_types.TopLevel)):
+        if self.widget_in_toolbox_chosen is None and self.selected_widget is not None:
             # mouse pointer mode chosen from widget toolbox
             self.user_form.widget_to_deselect_if_not_moved = None
-            # x_location = event.x_root - self.user_form.user_frame.winfo_rootx()
-            # y_location = event.y_root - self.user_form.user_frame.winfo_rooty()
-            # grid_location = self.user_form.user_frame.grid_location(x_location, y_location)
+            if isinstance(self.selected_widget, pyted_widget_types.TopLevel):
+                return
             frame, grid_location = self.user_form.find_grid_location(self.widgets.find_top_widget(), event.x_root,
                                                                      event.y_root)
             if self.selected_widget.type == tkinter.Toplevel:
@@ -274,15 +272,11 @@ class PytedCore:
                     selected_widget_current_frame == frame):
                 # pointer has not moved from current location so no need to try to move the widget
                 return
-            if grid_location[0] < 0 or grid_location[1] < 0:
+            if grid_location[0] is None:
                 # grid location is off the edge of the grid so do nothing
                 widget_under_mouse = None
             else:
-                try:
-                    widget_under_mouse = frame.tk_name.grid_slaves(column=grid_location[0], row=grid_location[1])[0]
-                except IndexError:
-                    # grid location returned is off the edge of the grid so do nothing
-                    widget_under_mouse = None
+                widget_under_mouse = frame.tk_name.grid_slaves(column=grid_location[0], row=grid_location[1])[0]
             if frame == self.selected_widget:
                 # selected widget is the frame and just moving inside frame so do nothing
                 widget_under_mouse = None
@@ -297,26 +291,18 @@ class PytedCore:
                     pyte_parent = self.widgets.find_pyte_parent(pyte_parent)
 
             if widget_under_mouse in self.user_form.filler_labels:
-                # print('widget move ', frame.name, grid_location)
-                # print('old location', self.selected_current_frame.name, self.selected_widget_current_column,
-                #       self.selected_widget_current_row)
-
                 # put a new filler label at the old position where the widget was
-                # print('>>>>>>>>>>>>', self.selected_widget.name, self.selected_widget_current_column)
                 self.user_form. new_filler_label(selected_widget_current_frame.tk_name, selected_widget_current_column,
                                                  selected_widget_current_row)
-
                 # remove filler label from where the widget will move to
                 self.user_form.filler_labels.remove(widget_under_mouse)
                 widget_under_mouse.destroy()
-
                 # move tk_widget, note have to destroy and re-create as you can not move tk_widgets between frames
                 self.selected_widget.tk_name.destroy()
                 clone = self.user_form.place_pyte_widget(self.selected_widget, tk_frame=frame.tk_name,
                                                          column=grid_location[0], row=grid_location[1])
                 if isinstance(self.selected_widget, pyted_widget_types.Frame):
                     self.user_form.fill_tk_container_widget(self.selected_widget)
-
                 # self.selected_widget.tk_name.grid(column=grid_location[0], row=grid_location[1])
                 if selected_widget_current_frame != frame:
                     widget_changed_frame = True
@@ -350,7 +336,7 @@ class PytedCore:
                 if remove:
                     remove_or_parent_remove = True
                     break
-                widget_to_check = self.widgets.find_pyte_widget(widget_to_check.parent)
+                widget_to_check = self.widgets.find_pyte_widget_from_m_name(widget_to_check.parent)
 
         if remove_or_parent_remove:
             self.handles.remove_selected_widget_handles()

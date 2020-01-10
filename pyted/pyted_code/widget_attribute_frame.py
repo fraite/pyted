@@ -7,7 +7,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from typing import List, Union
 
-import pyted.pyted_widget_types as pyted_widget_types
+import pyted.monet_widget_types as pyted_widget_types
 if TYPE_CHECKING:
     from pyted.pyted_code.pyted_core import PytedCore
 
