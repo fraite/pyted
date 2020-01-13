@@ -145,7 +145,7 @@ class PytedCore:
                 # when user form is drawn the widget parent will be handled by user form initialisation code
                 return
             self.user_form.empty_tk_container_widget(pyte_widget)
-            self.user_form.fill_tk_container_widget(pyte_widget)
+            self.user_form.fill_tk_container_frame(pyte_widget)
             self.handles.place_selected_widget_handles(pyte_widget.tk_name)
 
         elif attr_template == pyted_widget_types.ROW_CONFIGURE or attr_template == pyted_widget_types.COLUMN_CONFIGURE:
@@ -272,7 +272,7 @@ class PytedCore:
                     selected_widget_current_frame == frame):
                 # pointer has not moved from current location so no need to try to move the widget
                 return
-            if grid_location[0] is None:
+            if grid_location[0] < 0:
                 # grid location is off the edge of the grid so do nothing
                 widget_under_mouse = None
             else:
@@ -302,7 +302,10 @@ class PytedCore:
                 clone = self.user_form.place_pyte_widget(self.selected_widget, tk_frame=frame.tk_name,
                                                          column=grid_location[0], row=grid_location[1])
                 if isinstance(self.selected_widget, pyted_widget_types.Frame):
-                    self.user_form.fill_tk_container_widget(self.selected_widget)
+                    self.user_form.fill_tk_container_frame(self.selected_widget)
+                if isinstance(self.selected_widget, pyted_widget_types.Notebook):
+                    # TODO: implement notebook move
+                    self.user_form.fill_ttk_notebook(self.selected_widget)
                 # self.selected_widget.tk_name.grid(column=grid_location[0], row=grid_location[1])
                 if selected_widget_current_frame != frame:
                     widget_changed_frame = True
@@ -382,7 +385,7 @@ class PytedCore:
             if isinstance(self.root_window.focus_get(), ttk.Notebook):
                 enable_delete = True
             if isinstance(self.root_window.focus_get(), tkinter.ttk.Button):
-                print(self.root_window.focus_get().cget('text'))
+                # print(self.root_window.focus_get().cget('text'))
                 if self.root_window.focus_get().cget('text') == 'pointer':
                     enable_delete = True
             if self.root_window.focus_get() == self.navigator_tree:

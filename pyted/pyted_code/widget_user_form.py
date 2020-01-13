@@ -52,36 +52,41 @@ class UserForm:
 
         # Create and fill Frames with filler labels
         # first create containers before placing non-container widgets
-        self.fill_tk_container_widget(pyte_widget)
+        self.fill_tk_container_frame(pyte_widget)
 
         return pyte_widget
 
-    def fill_tk_container_widget(self, parent_pyte_widget: monet_widget_types.PytedGridContainerWidget) -> None:
+    def fill_tk_container_frame(self, monet_frame: monet_widget_types.PytedGridContainerWidget) -> None:
         """
-        Fill a tk container widget
+        Fill a tk container frame
 
-        Fills a tk container widget corresponding to a pyte_widget. The container widget is filled with (blank) label
+        Fills a tk container frame corresponding to a monet_widget. The container widget is filled with (blank) label
         widgets or widgets corresponding to pyte widgets. Where there are child container widgets, these are filled out
         recursively.
 
-        :param parent_pyte_widget: pyte container
+        :param monet_frame: monet frame container
         :return:
         """
 
-        for i_col in range(int(parent_pyte_widget.number_columns)):
-            for i_row in range(int(parent_pyte_widget.number_rows)):
-                self.new_filler_label(parent_pyte_widget.tk_name, i_col, i_row)
+        for i_col in range(int(monet_frame.number_columns)):
+            for i_row in range(int(monet_frame.number_rows)):
+                self.new_filler_label(monet_frame.tk_name, i_col, i_row)
 
         for pyte_widget in self.widgets.widget_list:
-            if pyte_widget.parent == parent_pyte_widget.name:
-                if (int(pyte_widget.column) >= int(parent_pyte_widget.number_columns) or
-                        int(pyte_widget.row) >= int(parent_pyte_widget.number_rows)):
+            if pyte_widget.parent == monet_frame.name:
+                if (int(pyte_widget.column) >= int(monet_frame.number_columns) or
+                        int(pyte_widget.row) >= int(monet_frame.number_rows)):
                     pyte_widget.remove = True
                 elif isinstance(pyte_widget, monet_widget_types.Frame):
                     self.place_pyte_widget(pyte_widget)
-                    self.fill_tk_container_widget(pyte_widget)
+                    self.fill_tk_container_frame(pyte_widget)
                 else:
                     self.place_pyte_widget(pyte_widget)
+
+    def fill_ttk_notebook(self, monet_notebook):
+        frame_list = filter(lambda frame: (frame.parent == monet_notebook.name), self.widgets.widget_list)
+        for frame in frame_list:
+            print(frame)
 
     def new_filler_label(self, container: tkinter.Widget, column: int, row: int) -> None:
         """
@@ -162,13 +167,14 @@ class UserForm:
         return tk_new_widget
 
     def find_grid_location(self, monet_frame: monet_widget_types.PytedGridContainerWidget, x_root: int, y_root: int)\
-            -> (monet_widget_types.PytedContainerWidget, (Union[int, None], Union[int, None])):
+            -> (monet_widget_types.PytedContainerWidget, (int, int)):
         """
         Find grid location in user_form
 
         Returns the grid location and the container for a given set of co-ordinates. If the co-ordinates are in a
         child container within the monet_frame, the grid location will be that of the child container. If the
-        co-ordinates are on the container itself, the row and column value returned is None.
+        co-ordinates are on the container itself (in other words the edge of the container), the row and column value
+        returned is -1.
 
         This function is called recursively to find the inner-most container.
 
@@ -184,35 +190,40 @@ class UserForm:
 
         # find widget at location given and see if it is a container
         for possible_m_widget in self.widgets.widget_list:
-            # if not possible_m_widget.type == tkinter.Toplevel:
             if isinstance(possible_m_widget, monet_widget_types.PytedPlacedWidget):
+                # the possible_m_widget is a placed widget so may be in grid location
                 if (grid_location == (int(possible_m_widget.column), int(possible_m_widget.row)) and
                         possible_m_widget.parent == monet_frame.name):
+                    # the possible_m_widget is in the same grid location
                     if isinstance(possible_m_widget, monet_widget_types.Frame):
+                        # the possible_m_widget is a frame so need to look inside frame
                         monet_frame, grid_location = self.find_grid_location(possible_m_widget, x_root, y_root)
                         break
                     if isinstance(possible_m_widget, monet_widget_types.Notebook):
-                        # TODO: need to code to get correct tab
-                        for pyte_widget_child in self.widgets.widget_list:
-                            if pyte_widget_child.parent == possible_m_widget.name:
-                                possible_pyte_widget, possible_grid_location =\
-                                    self.find_grid_location(pyte_widget_child, x_root, y_root)
+                        for m_possible_notebook_frame in self.widgets.widget_list:
+                            # TODO: need to code to get correct tab, this only finds the first frame
+                            if m_possible_notebook_frame.parent == possible_m_widget.name:
+                                # found frame in notebook, m_possible_notebook_frame
+                                possible_m_widget_in_frame, possible_grid_location =\
+                                    self.find_grid_location(m_possible_notebook_frame, x_root, y_root)
                                 # check to see if location is in notebook for frame
-                                if possible_grid_location[1] is not None and possible_grid_location[1] >= 0:
-                                    monet_frame = possible_pyte_widget
+                                if possible_grid_location[1] >= 0:
+                                    # location is inside child frame of notebook
+                                    monet_frame = possible_m_widget_in_frame
                                     grid_location = possible_grid_location
                                 else:
-                                    grid_location = [None, None]
+                                    # location is on the notebook
+                                    monet_frame = possible_m_widget
+                                    grid_location = (-1, -1)
                                 break
                         break
 
         # check to make sure x_root, y_root is not on the frame or outside
-        if grid_location[0] is not None:
-            if grid_location[0] < 0 or grid_location[0] >= int(monet_frame.number_columns):
-                grid_location = [None, None]
-        if grid_location[0] is not None:
-            if grid_location[1] < 0 or grid_location[1] >= int(monet_frame.number_rows):
-                grid_location = [None, None]
+
+        if grid_location[0] < 0 or grid_location[0] >= int(monet_frame.number_columns):
+            grid_location = (-1, -1)
+        if grid_location[1] < 0 or grid_location[1] >= int(monet_frame.number_rows):
+            grid_location = (-1, -1)
         return monet_frame, grid_location
 
     def new_tk_widget(self, pyte_widget: monet_widget_types.PytedPlacedWidget, tk_parent=None) -> tkinter.Widget:
@@ -301,79 +312,53 @@ class UserForm:
             old_proposed_widget_frame = self.proposed_widget_frame
             old_proposed_widget_location = self.proposed_widget_location
 
-            # insert new frame into a notebook?
-            if isinstance(frame, monet_widget_types.Notebook) and isinstance(self.proposed_widget, tkinter.Frame):
-                if self.proposed_widget_frame != frame:
-                    self.proposed_widget = self.pyted_core.widget_in_toolbox_chosen.type(frame.tk_name)
-                    self.proposed_widget_frame = frame
-                    self.proposed_widget_location = [None, None]
-                    number_columns = self.pyted_core.widget_in_toolbox_chosen.number_columns
-                    number_rows = self.pyted_core.widget_in_toolbox_chosen.number_rows
-                    self.proposed_widget['borderwidth'] = 2
-                    self.proposed_widget['relief'] = tkinter.GROOVE
-                    # tk_widget[attr] = getattr(pyte_widget, attr)
-                    for i_column in range(number_columns):
-                        for i_row in range(number_rows):
-                            # self.new_filler_label(self.proposed_widget, i_column, i_row)
-                            new_label = ttk.Label(self.proposed_widget, text=FILLER_TEXT)
-                            new_label.grid(row=i_row, column=i_column)
-                            new_label.bind("<Motion>", self.user_motion_callback)
-                            new_label.bind("<Button-1>", self.inserted_widget_click)
-                            # new_label.bind("<ButtonRelease-1>", self.widget_release)
-                            self.filler_labels.append(new_label)
-                    # self.proposed_widget.grid(column=grid_location[0], row=grid_location[1])
-                    frame.tk_name.add(self.proposed_widget)
-                    frame.tk_name.select(self.proposed_widget)
-                    self.proposed_widget.bind('<Motion>', self.user_motion_callback)
-                    self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
-
-            # insert a widget if there is a label widget
-            elif self.proposed_widget_location != grid_location or self.proposed_widget_frame != frame:
-                if grid_location[0] is None:
-                    widget_under_mouse = None
+            # insert a widget if there is a label widget or frame in a container
+            if self.proposed_widget_location != grid_location or self.proposed_widget_frame != frame:
+                # widget_under_mouse points to the widget under the mouse, it may be a container if on edge
+                if grid_location[0] < 0:
+                    widget_under_mouse = frame
                 else:
                     widget_under_mouse = frame.tk_name.grid_slaves(row=grid_location[1],
                                                                    column=grid_location[0])[0]
-                # widget is under mouse unless mouse is not in the user_frame area
-                if widget_under_mouse is not None:
+                # act depending on type of widget under the mouse
+                if isinstance(widget_under_mouse, monet_widget_types.Frame):
+                    # do nothing if trying to insert widget onto frame edge (not in)
+                    pass
+                elif (isinstance(old_proposed_widget_frame, monet_widget_types.Notebook) and
+                      isinstance(self.proposed_widget, tkinter.Frame)):
+                    # moving frame out of notebook
+                    # TODO: implement moving out of notebook
+                    #  print(self.proposed_widget_frame.name, old_proposed_widget_frame.name)
+                    # self.proposed_widget.destroy()
+                    pass
+                elif isinstance(widget_under_mouse, monet_widget_types.Notebook):
+                    if isinstance(self.proposed_widget, tkinter.Frame):
+                        # moving frame into notebook
+                        self.proposed_widget_frame = frame
+                        self.proposed_widget_location = (-1, -1)
+                        self.proposed_widget = self.pyted_core.widget_in_toolbox_chosen.type(frame.tk_name)
+                        self.fill_blank_tk_frame(self.proposed_widget)
+                        frame.tk_name.add(self.proposed_widget)
+                        frame.tk_name.select(self.proposed_widget)
+                        self.proposed_widget.bind('<Motion>', self.user_motion_callback)
+                        self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
+                    else:
+                        # moving widget that is not a frame into a notebook so do nothing
+                        pass
+                else:
                     if widget_under_mouse in self.filler_labels:
+                        # moving a widget onto a position with a filler label so insert it
                         self.proposed_widget_frame = frame
                         self.proposed_widget_location = grid_location
                         if self.pyted_core.widget_in_toolbox_chosen is monet_widget_types.Frame:
                             self.proposed_widget = self.pyted_core.widget_in_toolbox_chosen.type(frame.tk_name)
-                            number_columns = self.pyted_core.widget_in_toolbox_chosen.number_columns
-                            number_rows = self.pyted_core.widget_in_toolbox_chosen.number_rows
-                            self.proposed_widget['borderwidth'] = 2
-                            self.proposed_widget['relief'] = tkinter.GROOVE
-                            # tk_widget[attr] = getattr(pyte_widget, attr)
-                            for i_column in range(number_columns):
-                                for i_row in range(number_rows):
-                                    # self.new_filler_label(self.proposed_widget, i_column, i_row)
-                                    new_label = ttk.Label(self.proposed_widget, text=FILLER_TEXT)
-                                    new_label.grid(row=i_row, column=i_column)
-                                    new_label.bind("<Motion>", self.user_motion_callback)
-                                    new_label.bind("<Button-1>", self.inserted_widget_click)
-                                    # new_label.bind("<ButtonRelease-1>", self.widget_release)
-                                    self.filler_labels.append(new_label)
+                            self.fill_blank_tk_frame(self.proposed_widget)
                         elif self.pyted_core.widget_in_toolbox_chosen is monet_widget_types.Notebook:
                             self.proposed_widget = self.pyted_core.widget_in_toolbox_chosen.type(frame.tk_name)
                             # self.proposed_widget['height'] = 75
                             # self.proposed_widget['width'] = 100
                             self.proposed_widget_tab = tkinter.Frame(self.proposed_widget)
-                            number_columns = monet_widget_types.Frame.number_columns
-                            number_rows = monet_widget_types.Frame.number_rows
-                            self.proposed_widget_tab['borderwidth'] = 2
-                            self.proposed_widget_tab['relief'] = tkinter.GROOVE
-                            # tk_widget[attr] = getattr(pyte_widget, attr)
-                            for i_column in range(number_columns):
-                                for i_row in range(number_rows):
-                                    # self.new_filler_label(self.proposed_widget, i_column, i_row)
-                                    new_label = ttk.Label(self.proposed_widget_tab, text=FILLER_TEXT)
-                                    new_label.grid(row=i_row, column=i_column)
-                                    new_label.bind("<Motion>", self.user_motion_callback)
-                                    new_label.bind("<Button-1>", self.inserted_widget_click)
-                                    # new_label.bind("<ButtonRelease-1>", self.widget_release)
-                                    self.filler_labels.append(new_label)
+                            self.fill_blank_tk_frame(self.proposed_widget_tab)
                             self.proposed_widget.add(self.proposed_widget_tab, text='tab 1')
                         elif hasattr(self.pyted_core.widget_in_toolbox_chosen, 'text'):
                             text = self.widgets.generate_unique_name(self.pyted_core.widget_in_toolbox_chosen)
@@ -392,6 +377,8 @@ class UserForm:
                         self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
 
                         widget_under_mouse.destroy()
+
+
                         # print('new inserted widget x, y', event.x_root, event.y_root, grid_location)
             # replace old proposed widget with filler label (including if mouse moved out of user_frame)
             # print('here:', old_proposed_widget_location)
@@ -401,6 +388,19 @@ class UserForm:
                     old_proposed_widget.destroy()
                     self.new_filler_label(old_proposed_widget_frame.tk_name,
                                           old_proposed_widget_location[0], old_proposed_widget_location[1])
+
+    def fill_blank_tk_frame(self, proposed_widget):
+        number_columns = monet_widget_types.Frame.number_columns
+        number_rows = monet_widget_types.Frame.number_rows
+        proposed_widget['borderwidth'] = 2
+        proposed_widget['relief'] = tkinter.GROOVE
+        for i_column in range(number_columns):
+            for i_row in range(number_rows):
+                new_label = ttk.Label(proposed_widget, text=FILLER_TEXT)
+                new_label.grid(row=i_row, column=i_column)
+                new_label.bind("<Motion>", self.user_motion_callback)
+                new_label.bind("<Button-1>", self.inserted_widget_click)
+                self.filler_labels.append(new_label)
 
     def user_form_click_callback(self, event, _frame):
         m_frame, grid_location = self.find_grid_location(self.widgets.find_top_widget(), event.x_root, event.y_root)
