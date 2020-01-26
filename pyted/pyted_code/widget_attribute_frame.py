@@ -49,7 +49,7 @@ class AttributeFrame:
         if selected_widget is None:
             return
         for k, v in selected_pyte_widget.get_input_type().items():
-            if v != pyted_widget_types.NO_INPUT:
+            if v != pyted_widget_types.NO_INPUT and getattr(selected_pyte_widget, k) is not None:
                 if selected_pyte_widget.get_code_template(k).startswith('<'):
                     property_frame = self.event_frame
                     event_row = event_row + 1

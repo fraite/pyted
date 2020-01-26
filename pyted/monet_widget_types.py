@@ -535,6 +535,7 @@ class Frame(PytedGridContainerWidget, PytedPlacedWidget):
     relief: str = field(default=tkinter.GROOVE, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                           'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
                                                                       tkinter.GROOVE)})
+    tab_text: str = field(default=None, metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = tkinter.Frame(self.{self.parent})\n'
@@ -584,7 +585,7 @@ class TtkEntry(PytedPlacedWidget):
 
 
 @dataclass
-class Notebook(PytedPlacedWidget):
+class Notebook(PytedPlacedWidget, PytedContainerWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=ttk.Notebook, init=False)

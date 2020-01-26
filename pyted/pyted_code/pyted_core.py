@@ -224,6 +224,13 @@ class PytedCore:
                 return
             return
 
+        elif attr_template == pyted_widget_types.BESPOKE_CODE and (attr == 'tab_text'):
+            if init:
+                # when user form is drawn the tk_name will be handled by user form initialisation code
+                return
+            self.widgets.find_tk_parent(pyte_widget).tab(pyte_widget.tk_name, text=new_value)
+            return
+
         elif attr_template == pyted_widget_types.BESPOKE_CODE and attr == 'tk_name':
             if init:
                 # when user form is drawn the tk_name will be handled by user form initialisation code
@@ -247,7 +254,7 @@ class PytedCore:
             return
 
         else:
-            raise Exception(f'attr_template "{attr_template}" not yet configured')
+            raise Exception(f'attr_template "{attr_template}" for "{attr}" not yet configured')
             # print(f'attr_template {attr_template} not yet implemented for {attr}')
 
     def widget_move(self, event):
@@ -272,7 +279,7 @@ class PytedCore:
                     selected_widget_current_frame == frame):
                 # pointer has not moved from current location so no need to try to move the widget
                 return
-            if grid_location[0] < 0:
+            if grid_location[0] < 0 or grid_location[1] < 0:
                 # grid location is off the edge of the grid so do nothing
                 widget_under_mouse = None
             else:
@@ -290,10 +297,38 @@ class PytedCore:
                         break
                     pyte_parent = self.widgets.find_pyte_parent(pyte_parent)
 
-            if widget_under_mouse in self.user_form.filler_labels:
-                # put a new filler label at the old position where the widget was
-                self.user_form. new_filler_label(selected_widget_current_frame.tk_name, selected_widget_current_column,
-                                                 selected_widget_current_row)
+            if (isinstance(frame, pyted_widget_types.Notebook) and
+                    isinstance(self.selected_widget, pyted_widget_types.Frame)):
+                self.user_form.new_filler_label(selected_widget_current_frame.tk_name,
+                                                selected_widget_current_column,
+                                                selected_widget_current_row)
+                if getattr(self.selected_widget, 'tab_text') is None:
+                    setattr(self.selected_widget, 'tab_text', 'tab text')
+                tab_text = getattr(self.selected_widget, 'tab_text')
+                self.selected_widget.tk_name.destroy()
+                clone = self.user_form.place_pyte_widget(self.selected_widget, tk_frame=frame.tk_name)
+                self.user_form.fill_tk_container_frame(self.selected_widget)
+                frame.tk_name.add(clone, text=tab_text)
+                frame.tk_name.select(clone)
+                self.selected_widget.parent = frame.name
+                self.attr_frame.update(self.selected_widget)
+                self.navigator_tree_obj.build_navigator_tree()
+                self.handles.place_selected_widget_handles(clone)
+
+
+            elif widget_under_mouse in self.user_form.filler_labels:
+                selected_widget_parent = self.widgets.find_pyte_parent(self.selected_widget)
+                if (isinstance(self.selected_widget, pyted_widget_types.Frame) and
+                        isinstance(selected_widget_parent, pyted_widget_types.Notebook)):
+                    if selected_widget_parent.tk_name.index('end') > 1:
+                        selected_widget_parent.tk_name.forget(str(self.selected_widget.tk_name))
+                    else:
+                        return
+                else:
+                    # put a new filler label at the old position where the widget was
+                    self.user_form. new_filler_label(selected_widget_current_frame.tk_name,
+                                                     selected_widget_current_column,
+                                                     selected_widget_current_row)
                 # remove filler label from where the widget will move to
                 self.user_form.filler_labels.remove(widget_under_mouse)
                 widget_under_mouse.destroy()
@@ -340,6 +375,15 @@ class PytedCore:
                     remove_or_parent_remove = True
                     break
                 widget_to_check = self.widgets.find_pyte_widget_from_m_name(widget_to_check.parent)
+
+        # if new_selected_pyte_widget is in a Notebook then select frame
+        p_parent_widget = new_selected_pyte_widget
+        # if parent is
+        while not isinstance(p_parent_widget, pyted_widget_types.TopLevel):
+            p_frame_widget = p_parent_widget
+            p_parent_widget = self.widgets.find_pyte_parent(p_frame_widget)
+            if isinstance(p_parent_widget, pyted_widget_types.Notebook):
+                p_parent_widget.tk_name.select(str(p_frame_widget.tk_name))
 
         if remove_or_parent_remove:
             self.handles.remove_selected_widget_handles()
@@ -438,6 +482,8 @@ class PytedCore:
                                   self.user_form.widget_click(event, arg1)
                                   )
                 filler_label.bind("<ButtonRelease-1>", self.user_form.widget_release)
+            if isinstance(self.widgets.find_pyte_parent(new_widget), pyted_widget_types.Notebook):
+                setattr(new_widget, 'tab_text', 'tab text')
 
         self.widgets.widget_list.append(new_widget)
         self.navigator_tree_obj.build_navigator_tree()
@@ -465,7 +511,7 @@ class PytedCore:
         root.filename = filedialog.asksaveasfilename(title="Select file", defaultextension=".py",
                                                      filetypes=(("python files", "*.py"), ("all files", "*.*")))
         if not root.filename == '':
-            code = save_load.generate_code(self.widgets.widget_list)
+            code = save_load.generate_code(self.widgets)
             with open(root.filename, 'w') as f:
                 f.write(code)
         else:
@@ -488,7 +534,7 @@ class PytedCore:
             pass
 
     def menu_preview(self):
-        code = save_load.generate_code(self.widgets.widget_list)
+        code = save_load.generate_code(self.widgets)
         name_space = {}
         exec(code, name_space)
         gui_class = name_space['GuiCollection']

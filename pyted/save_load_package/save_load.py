@@ -3,10 +3,12 @@ import inspect
 import importlib.resources as pkg_resources
 
 from pyted import monet_widget_types
+from pyted.pyted_code.widgets import Widgets
 
 
-def generate_code(widgets) -> str:
-    parent_widget = widgets[0].name
+def generate_code(widgets: Widgets) -> str:
+    widget_list = widgets.widget_list
+    parent_widget = widget_list[0].name
     code = ''
     code = code + f'import tkinter\n'
     # TODO check to see if ttk is needed
@@ -24,7 +26,7 @@ def generate_code(widgets) -> str:
     code = code + f'    def __init__(self):\n'
     code = code + f'        pass\n'
 
-    code = build_binder_class(code, widgets)
+    code = build_binder_class(code, widget_list)
 
     # with open('init_tk_var.txt', 'r') as file:
     #     code_bit = file.read()
@@ -55,7 +57,7 @@ def generate_code(widgets) -> str:
     code = code + f'            # generate top level window\n'
     code = code + f'            top_level = tkinter.Toplevel(parent)\n'
 
-    code = place_widgets(code, None, widgets)
+    code = place_widgets(code, None, widget_list)
     code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close)'
     code = code + f'\n'
     code = code + f'\n'
@@ -67,7 +69,8 @@ def generate_code(widgets) -> str:
 
     # find top level widget
     top_level_widget = None
-    for pyted_widget in widgets:
+    # TODO: change to filter
+    for pyted_widget in widget_list:
         if pyted_widget.label == 'Toplevel':
             top_level_widget = pyted_widget
             break
@@ -118,9 +121,16 @@ def build_binder_class(code, widgets):
     return code
 
 
-def place_widgets(code, parent_widget, widgets):
-    for pyte_widget in widgets:
-        if pyte_widget.parent == parent_widget:
+def place_widgets(code, m_parent_widget, widget_list):
+
+    # top level widgets have no parents so m_parent_widget passed is None, so name will be None
+    if m_parent_widget is None:
+        parent_widget_name = None
+    else:
+        parent_widget_name = m_parent_widget.name
+
+    for pyte_widget in widget_list:
+        if pyte_widget.parent == parent_widget_name:
             code = code + f'        # new_widget({pyte_widget.label})\n'
             code = code + f'        ' + pyte_widget.generate_code()
             # add rowconfigure and columnconfigure code for container widgets
@@ -182,14 +192,14 @@ def place_widgets(code, parent_widget, widgets):
                         code = code + f'            self.{pyte_widget.name}.bind("{attr_template}", lambda\n' \
                                       f'                             event, arg1=self.{pyte_widget.name}:\n' \
                                       f'                             gui_binder.{event_method}(event, arg1))\n'
-            if isinstance(pyte_widget, monet_widget_types.PytedGridContainerWidget):
-                pass
-            # TODO: add code that adds frames as tabs to Notebook
-            # TODO: eg self.notebook1.add(self.frame1, text='tab 1')
+            if (isinstance(pyte_widget, monet_widget_types.PytedGridContainerWidget) and
+                    isinstance(m_parent_widget, monet_widget_types.Notebook)):
+                tab_text = getattr(pyte_widget, 'tab_text')
+                code = code + f'        self.{parent_widget_name}.add(self.{pyte_widget.name}, text="{tab_text}")\n'
             if (isinstance(pyte_widget, monet_widget_types.PytedGridContainerWidget) or
                     isinstance(pyte_widget, monet_widget_types.Project) or
                     isinstance(pyte_widget, monet_widget_types.Notebook)):
-                code = place_widgets(code, pyte_widget.name, widgets)
+                code = place_widgets(code, pyte_widget, widget_list)
     return code
 
 
@@ -424,7 +434,12 @@ def parse_code(f):
         current_line = f.readline()
         current_line2 = current_line.strip()
         while current_line2.startswith('self.') or current_line2.startswith('# self.'):
-            load_widget_attr(f, widget, current_line2)
+            if current_line2.startswith(f'self.{widget.parent}.add(self.{widget.name}, text="'):
+                # adding frame to notebook
+                tab_text = current_line2.split('="')[1].split('"')[0]
+                setattr(widget, 'tab_text', tab_text)
+            else:
+                load_widget_attr(f, widget, current_line2)
             current_line = f.readline()
             current_line2 = current_line.strip()
             while current_line2 == '' or current_line2.startswith("if gui_binder is not None and not"):
