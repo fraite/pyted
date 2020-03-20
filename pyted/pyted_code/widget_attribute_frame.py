@@ -156,7 +156,8 @@ class AttributeFrame:
         # fill row/col tab
         pyte_parent = self.widgets.find_pyte_parent(selected_pyte_widget)
         if (isinstance(selected_pyte_widget, pyted_widget_types.PytedPlacedWidget) and
-                not isinstance(pyte_parent, pyted_widget_types.Notebook)):
+                not isinstance(pyte_parent, pyted_widget_types.Notebook) and
+                not isinstance(pyte_parent, pyted_widget_types.PanedWindow)):
             self.attr_notebook.add(self.pyted_window.row_col_tab_frame)
             # row weight
             lab = tkinter.Label(self.row_col_frame, text='row weight')

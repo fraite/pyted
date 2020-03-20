@@ -192,8 +192,6 @@ class PytedContainerWidget(PytedWidget):
     """
 
     type: type = field(default='PytedContainerWidget', init=False)
-    # TODO: remove when PyCharm works; the next line not really needed but PyCharm complains if no new field is defined
-    name: str = field(default=None, metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
 
 
 @dataclass
@@ -597,4 +595,22 @@ class Notebook(PytedPlacedWidget, PytedContainerWidget):
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Notebook(self.{self.parent})\n'
+        return code
+
+
+@dataclass
+class PanedWindow(PytedPlacedWidget, PytedContainerWidget):
+
+    # class attributes (or as close as we can get to class attributes)
+    type: type = field(default=tkinter.PanedWindow, init=False)
+    # tab turned off so does not display
+    # tab: str = field(default='tkinter', init=False)
+    label: str = field(default='PanedWindow', init=False)
+
+    # instance attributes
+    tk_name: ttk.PanedWindow = field(default=None, metadata={'type': NO_INPUT, 'template': BESPOKE_CODE,
+                                                             'options': None})
+
+    def generate_code(self):
+        code = f'self.{self.name} = tkinter.PanedWindow(self.{self.parent})\n'
         return code

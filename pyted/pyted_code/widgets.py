@@ -45,7 +45,7 @@ class Widgets:
     def find_pyte_widget_from_tk(self, tk_name) -> pyted_widget_types.PytedWidget:
         for pyte_widget in self.widget_list:
             try:
-                if pyte_widget.tk_name == tk_name:
+                if str(pyte_widget.tk_name) == str(tk_name):
                     return pyte_widget
             except AttributeError:
                 pass

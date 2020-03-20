@@ -1,6 +1,6 @@
 #
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Union, Optional
 
 import tkinter
 from tkinter import ttk
@@ -26,6 +26,7 @@ class UserForm:
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
         self.proposed_widget_tab = None
+        self.proposed_widget_tab2 = None
         self.mouse_button1_pressed = False
         self.widget_to_deselect_if_not_moved = None
 
@@ -206,6 +207,21 @@ class UserForm:
                 if (grid_location == (int(possible_m_widget.column), int(possible_m_widget.row)) and
                         possible_m_widget.parent == m_frame.name):
                     # the possible_m_widget is in the same grid location
+                    if isinstance(possible_m_widget, monet_widget_types.PanedWindow):
+                        tk_panedwindow = possible_m_widget.tk_name
+                        x_pane = x_root - tk_panedwindow.winfo_rootx()
+                        y_pane = y_root - tk_panedwindow.winfo_rooty()
+                        for sash_index in range(len(tk_panedwindow.panes())-1):
+                            if x_pane < tk_panedwindow.sash_coord(sash_index)[0]:
+                                tk_frame = tk_panedwindow.panes()[sash_index]
+                                break
+                        else:
+                            tk_frame = tk_panedwindow.panes()[-1]
+                        m_frame = self.widgets.find_pyte_widget_from_tk(tk_frame)
+                        x_frame = x_root - m_frame.tk_name.winfo_rootx()
+                        y_frame = y_root - m_frame.tk_name.winfo_rooty()
+                        grid_location = m_frame.tk_name.grid_location(x_frame, y_frame)
+
                     if isinstance(possible_m_widget, monet_widget_types.Frame):
                         # the possible_m_widget is a frame so need to look inside frame
                         m_frame, grid_location = self.find_grid_location(possible_m_widget, x_root, y_root)
@@ -354,6 +370,19 @@ class UserForm:
                     else:
                         # moving widget that is not a frame into a notebook so do nothing
                         pass
+                elif isinstance(widget_under_mouse, monet_widget_types.PanedWindow):
+                    if isinstance(self.proposed_widget, tkinter.Frame):
+                        # moving frame into notebook
+                        self.proposed_widget_frame = frame
+                        self.proposed_widget_location = (-1, -1)
+                        self.proposed_widget = self.pyted_core.widget_in_toolbox_chosen.type(frame.tk_name)
+                        self.fill_blank_tk_frame(self.proposed_widget)
+                        frame.tk_name.add(self.proposed_widget)
+                        self.proposed_widget.bind('<Motion>', self.user_motion_callback)
+                        self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
+                    else:
+                        # moving widget that is not a frame into a notebook so do nothing
+                        pass
                 else:
                     if widget_under_mouse in self.filler_labels:
                         # moving a widget onto a position with a filler label so insert it
@@ -369,6 +398,16 @@ class UserForm:
                             self.proposed_widget_tab = tkinter.Frame(self.proposed_widget)
                             self.fill_blank_tk_frame(self.proposed_widget_tab)
                             self.proposed_widget.add(self.proposed_widget_tab, text='tab text')
+                        elif self.pyted_core.widget_in_toolbox_chosen is monet_widget_types.PanedWindow:
+                            self.proposed_widget = self.pyted_core.widget_in_toolbox_chosen.type(frame.tk_name)
+                            # self.proposed_widget['height'] = 75
+                            # self.proposed_widget['width'] = 100
+                            self.proposed_widget_tab = tkinter.Frame(self.proposed_widget)
+                            self.fill_blank_tk_frame(self.proposed_widget_tab)
+                            self.proposed_widget.add(self.proposed_widget_tab)
+                            self.proposed_widget_tab2 = tkinter.Frame(self.proposed_widget)
+                            self.fill_blank_tk_frame(self.proposed_widget_tab2)
+                            self.proposed_widget.add(self.proposed_widget_tab2)
                         elif hasattr(self.pyted_core.widget_in_toolbox_chosen, 'text'):
                             text = self.widgets.generate_unique_name(self.pyted_core.widget_in_toolbox_chosen)
                             if hasattr(self.pyted_core.widget_in_toolbox_chosen, 'value'):
@@ -387,8 +426,6 @@ class UserForm:
 
                         widget_under_mouse.destroy()
 
-
-                        # print('new inserted widget x, y', event.x_root, event.y_root, grid_location)
                 # replace old proposed widget with filler label (including if mouse moved out of user_frame)
                 # print('here:', old_proposed_widget_location)
                 if (old_proposed_widget_location != grid_location or old_proposed_widget_frame != frame) and\
@@ -403,6 +440,57 @@ class UserForm:
                         else:
                             self.new_filler_label(old_proposed_widget_frame.tk_name,
                                                   old_proposed_widget_location[0], old_proposed_widget_location[1])
+
+                # resize paned window if a widget has been moved into the pane
+                parent_widget = self.proposed_widget
+                while parent_widget is not None:
+                    parent_widget = parent_widget.master
+                    if isinstance(parent_widget, tkinter.PanedWindow):
+                        self.resize_paned_window(parent_widget)
+
+                # resize paned window if a widget has been moved out of the pane
+                if old_proposed_widget_frame is not None:
+                    parent_widget = old_proposed_widget_frame.tk_name
+                else:
+                    parent_widget = None
+                while parent_widget is not None:
+                    parent_widget = parent_widget.master
+                    if isinstance(parent_widget, tkinter.PanedWindow):
+                        self.resize_paned_window(parent_widget)
+
+    def resize_paned_window(self, tk_paned_window: tkinter.PanedWindow):
+        #print(tk_paned_window)
+        column, row = tk_paned_window.grid_info()['column'], tk_paned_window.grid_info()['row']
+        tk_paned_window.grid_forget()
+        p_pane_list = []
+        for pane_index in range(len(tk_paned_window.panes())):
+            p_pane_list.append(self.widgets.find_pyte_widget_from_tk(str(tk_paned_window.panes()[0])))
+            tk_paned_window.forget(p_pane_list[-1].tk_name)
+            tk_widget_list = []
+            tk_widget_row = []
+            tk_widget_column = []
+            for tk_widget in p_pane_list[-1].tk_name.winfo_children():
+                tk_widget_list.append(tk_widget)
+                #print(tk_widget)
+                tk_widget_row.append(tk_widget.grid_info()['row'])
+            #print(p_pane_list[-1])
+        for p_pane in p_pane_list:
+            tk_paned_window.add(p_pane.tk_name)
+        tk_paned_window.grid(row=row, column=column)
+
+    def forget_paned_window_parent(self, tk_widget) -> Optional[tkinter.PanedWindow]:
+        parent_widget = tk_widget
+        while parent_widget is not None:
+            parent_widget = parent_widget.master
+            if isinstance(parent_widget, tkinter.PanedWindow):
+                print('paned_window found')
+                # TODO: forget paned_window
+                return parent_widget
+        return None
+
+    def show_paned_window_parent(self, tk_paned_window: tkinter.PanedWindow):
+        p_paned_window = self.widgets.find_pyte_parent(tk_paned_window)
+        tk_paned_window.grid(row=p_paned_window.row, column=p_paned_window.column)
 
     def fill_blank_tk_frame(self, proposed_widget):
         number_columns = monet_widget_types.Frame.number_columns

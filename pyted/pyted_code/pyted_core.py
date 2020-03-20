@@ -297,8 +297,13 @@ class PytedCore:
                         break
                     pyte_parent = self.widgets.find_pyte_parent(pyte_parent)
 
+            if isinstance(self.selected_widget, pyted_widget_types.PanedWindow):
+                # stop PanedWindow from resizing by stopping any further bindings being activated
+                return 'break'
+
             if (isinstance(frame, pyted_widget_types.Notebook) and
                     isinstance(self.selected_widget, pyted_widget_types.Frame)):
+                # add tab to Notebook
                 self.user_form.new_filler_label(selected_widget_current_frame.tk_name,
                                                 selected_widget_current_column,
                                                 selected_widget_current_row)
@@ -315,11 +320,12 @@ class PytedCore:
                 self.navigator_tree_obj.build_navigator_tree()
                 self.handles.place_selected_widget_handles(clone)
 
-
             elif widget_under_mouse in self.user_form.filler_labels:
                 selected_widget_parent = self.widgets.find_pyte_parent(self.selected_widget)
+                paned_window_parent_forgotten = self.user_form.forget_paned_window_parent(widget_under_mouse)
                 if (isinstance(self.selected_widget, pyted_widget_types.Frame) and
                         isinstance(selected_widget_parent, pyted_widget_types.Notebook)):
+                    # remove tab from Notebook (if there is more than one)
                     if selected_widget_parent.tk_name.index('end') > 1:
                         selected_widget_parent.tk_name.forget(str(self.selected_widget.tk_name))
                     else:
@@ -350,10 +356,28 @@ class PytedCore:
                 self.selected_widget.column = grid_location[0]
                 self.selected_widget.row = grid_location[1]
                 self.attr_frame.update(self.selected_widget)
-                self.handles.place_selected_widget_handles(clone)
                 if widget_changed_frame:
                     self.navigator_tree_obj.build_navigator_tree()
                 # print('end move widget')
+
+                # resize paned window if a widget has been moved into the pane
+                parent_widget = self.selected_widget.tk_name
+                while parent_widget is not None:
+                    parent_widget = parent_widget.master
+                    if isinstance(parent_widget, tkinter.PanedWindow):
+                        self.user_form.resize_paned_window(parent_widget)
+
+                # resize paned window if a widget has been moved out of the pane
+                if selected_widget_current_frame is not None:
+                    parent_widget = selected_widget_current_frame.tk_name
+                else:
+                    parent_widget = None
+                while parent_widget is not None:
+                    parent_widget = parent_widget.master
+                    if isinstance(parent_widget, tkinter.PanedWindow):
+                        self.user_form.resize_paned_window(parent_widget)
+
+                self.handles.place_selected_widget_handles(clone)
 
     def select_widget(self, new_selected_pyte_widget) -> None:
         self.selected_widget = new_selected_pyte_widget
@@ -379,7 +403,7 @@ class PytedCore:
         # if new_selected_pyte_widget is in a Notebook then select frame
         p_parent_widget = new_selected_pyte_widget
         # if parent is
-        while not isinstance(p_parent_widget, pyted_widget_types.TopLevel):
+        while not isinstance(p_parent_widget, pyted_widget_types.TopLevel) and p_parent_widget is not None:
             p_frame_widget = p_parent_widget
             p_parent_widget = self.widgets.find_pyte_parent(p_frame_widget)
             if isinstance(p_parent_widget, pyted_widget_types.Notebook):
@@ -493,6 +517,14 @@ class PytedCore:
             child_frame_widget = pyted_widget_types.Frame()
             child_frame_widget.parent = new_widget
             self.insert_widget(child_frame_widget, self.user_form.proposed_widget_tab, new_widget, [0, 0])
+
+        if isinstance(new_widget, pyted_widget_types.PanedWindow):
+            child_frame_widget = pyted_widget_types.Frame()
+            child_frame_widget.parent = new_widget
+            self.insert_widget(child_frame_widget, self.user_form.proposed_widget_tab, new_widget, [0, 0])
+            child_frame_widget = pyted_widget_types.Frame()
+            child_frame_widget.parent = new_widget
+            self.insert_widget(child_frame_widget, self.user_form.proposed_widget_tab2, new_widget, [0, 0])
 
         self.user_form.proposed_widget_frame = None
         self.user_form.proposed_widget_location = None

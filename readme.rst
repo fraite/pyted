@@ -4,8 +4,8 @@ pyted
 
 Overview
 ========
-Pyted is an experimental Python tkinter editor that allows a tkinter window to be designed and saved to a file. The
-saved file is Python code that can be used without any dependencies.
+Pyted is an experimental Python drag and drop tkinter editor that allows a tkinter window to be designed and saved to a
+file. The saved file is Python code that can be used without any dependencies.
 
 Requirements
 ============
@@ -13,11 +13,11 @@ Requirements
 
 Install
 =======
-Download the pyted_package from Github.
+Download the pyted package from Github.
 
 Use
 ===
-Run pyted.py. For more information see the "quick_start" document in the "docs" directory.
+Run pyted_runner.py. For more information see the "quick_start" document in the "docs" directory.
 
 Development so Far
 ==================

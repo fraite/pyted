@@ -105,7 +105,8 @@ class NavigatorTree:
                                                text=widget.name, values='"' + repr(widget.type) + '"',
                                                tags='widget')
                     # TODO: change the below to use container widget superclass
-                    if isinstance(widget, pyted_widget_types.Frame) or isinstance(widget, pyted_widget_types.Notebook):
+                    if (isinstance(widget, pyted_widget_types.Frame) or isinstance(widget, pyted_widget_types.Notebook)
+                            or isinstance(widget, pyted_widget_types.PanedWindow)):
                         self.navigator_tree.item(widget.name, open=True)
                         self.build_navigator_tree_parent(widget)
 

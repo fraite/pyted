@@ -9,7 +9,7 @@ the program.
 
 Installing the program
 ======================
-Download or clone the pyted_package, or the entire github repository. Make sure that Python 3.7 or a newer version is
+Download or clone the pyted package, or the entire github repository. Make sure that Python 3.7 or a newer version is
 installed on your machine.
 
 Running the program
@@ -19,20 +19,23 @@ Run the pyted.py script in python. The pyted GUI should appear.
 Designing a new user window
 ===========================
 
-The pyted GUI is divided into 3 columns: the centre column shows the user
-form that the user is designing, the left column has a widget navigator that shows all the widgets in the user form, and
+The pyted GUI is divided into 3 columns: the centre column shows the design frame
+that the user is designing, the left column has a widget navigator that shows all the widgets in the user form, and
 the right hand column shows a widget picker and a list of all attributes of the selected widget.
 
 Adding and deleting new widgets
 -------------------------------
 
-To add a new widget to the user form, select a widget from the widget picker in the top right of the program GUI. For
-example press the "Label" button and move the mouse over the user form (the square in the centre of the program GUI
-with dots). A label widget will appear under the mouse on the user form and will move around as the user moves the
-mouse. When the label is in the desired location, the left mouse is pressed and the label will be placed into the user
-form. The widget navigator on the left of the GUI will be updated to show the new widget and the list of attributes on
-the right of the GUI will show a list of attributes associated with the new label widget. The user can then continue to
-place label widgets, chose a different widget to add in the widget picker, or choose the pointer.
+To add a new widget to the design frame, select a widget from the widget picker in the top right of the program GUI.
+Tabs
+collect widget types together so that they can be easily found. For example the "Label" widget is found under the
+"tkinter" tab and the ttk version of the widget "TLabel" is found under the "ttk" tab. Press the "Label" button in the
+"tkinter" tab and move the mouse over the design frame (the square in the centre of the program GUI
+with dots). A label widget will appear under the mouse on the design frame and will move around as the user moves the
+mouse. When the label is in the desired location, the left mouse is pressed and the label will be placed into the design
+frame. The widget navigator on the left of the GUI will be updated to show the new widget and the list of attributes on
+the right of the GUI will show a list of attributes associated with the new label widget. The mouse will go back into
+pointer mode to allow widgets on the design frame to be selected.
 
 The last placed widget will have four red handles, or if the pointer function is selected then the last selected widget,
 and this denotes the widget as the selected widget. The attributes of the widget selected are shown on the right hand
@@ -42,24 +45,25 @@ For example by selecting the first label widget created, it can be seen that the
 text of the label is "label1". The text can be changed to say "First Name" and the name to "first_name_label".
 
 To select a widget go to the widget picker on the top right of the pyted GUI, select the pointer button, and then select
-the desired widget in the user form. Alternatively select the widget in the widget navigator on the left of the pyted
+the desired widget in the design frame. Alternatively select the widget in the widget navigator on the left of the pyted
 GUI.
 
 To delete a widget, just select the widget and press the delete key.
 
-Resizing the user form grid and previewing the user form
---------------------------------------------------------
+Resizing the design frame grid and previewing the user form
+-----------------------------------------------------------
 
-The user form places the widgets on a grid, with dots showing each grid position. The grid can be resized using the
+The design frame places the widgets on a grid, with dots showing each grid position. The grid can be resized using the
 number_columns and number_rows attributes for the TopLevel widget, called "gui_1" by default. Empty columns and rows are
-shown in the user form but when the user form is used tkinter will not show empty columns and rows. In the file menu
+shown in the design frame but when the design frame is used tkinter will not show empty columns and rows.
+In the file menu
 preview can be selected to view how the user form will look when used.
 
 Container widgets, row and column spanning
 ------------------------------------------
 
 Row and column spanning has not yet been implemented, but the same effect can be obtained using container widgets. The
-only container widget implemented so far is the frame widget. This can be added to the user frame in the same way that
+simplest container widget is the frame widget. This can be added to the user frame in the same way that
 any other widget is added. The frame widget grid can be resized in the same way as the TopLevel widget by changing the
 number_columns and number_rows attributes. If there are no widgets inside the frame widget, then when the user form is
 previewed the frame will not be visible.
@@ -73,7 +77,7 @@ be seen in the widget navigator on the left of the Pyted GUI and the StringVar a
 be changed as desired, for example the name of the StringVar can be changed from "stringvar1" to "first_name".
 
 The tkinter variable can then be associated to other widgets. For example create an Entry widget (or select an Entry
-widget if already created on the user form grid). The textvariable attribute can then be changed to any tkinter variable
+widget if already created on the design frame). The textvariable attribute can then be changed to any tkinter variable
 created.
 
 For the Radiobutton widget, only one Radiobutton can be selected in a group at one point in time. A group is identified
@@ -88,9 +92,10 @@ saved user forms is also a menu item under the file menu.
 Using saved user forms
 ======================
 
-The saved file is actually a Python script that can be run or loaded as a module. This script does not load any modules
-other than tkinter so should not have any dependencies. Additionally this script can work with any version of Python 3
-and does not need Python 3.7 or newer. An example of a saved file is given in the samples directory in the file
+The saved file is actually a Python script that can be run or loaded as a module. This script does not import any
+modules other than tkinter so should not have any dependencies. Additionally this script can work with any version of
+Python 3 and does not need Python 3.7 or newer. An example of a saved file is given in the "samples" directory in the
+file
 "python_actors.py".
 
 When the saved file is run as a script it will display the user form and then print all the tkinter variables defined.
@@ -111,8 +116,7 @@ The above example will show the python_actors gui and wait for the user to inter
 Once closed, all the tkinter variables defined in the gui will be returned in the form of a dictionary. By associating
 widgets with tkinter variables the states of the widgets in the gui is discovered.
 
-The default values in the python_actors gui will be defined by the set value of the tkinter variables. If it is required
-that the default values are set at run time the complex dialogue box method can be used.
+The default values in the python_actors gui will be defined by the set value of the tkinter variables.
 
 Input dictionary dialogue box method
 ------------------------------------
