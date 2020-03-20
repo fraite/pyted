@@ -1,6 +1,6 @@
 #
 from __future__ import annotations
-from typing import TYPE_CHECKING, Union, Optional
+from typing import TYPE_CHECKING, Optional, List
 
 import tkinter
 from tkinter import ttk
@@ -21,7 +21,7 @@ class UserForm:
         self.pyted_core = pyted_core
         self.widgets = pyted_core.widgets
 
-        self.filler_labels = []
+        self.filler_labels: List[tkinter.Label] = []
         self.proposed_widget = None
         self.proposed_widget_frame = None
         self.proposed_widget_location = None
@@ -210,7 +210,7 @@ class UserForm:
                     if isinstance(possible_m_widget, monet_widget_types.PanedWindow):
                         tk_panedwindow = possible_m_widget.tk_name
                         x_pane = x_root - tk_panedwindow.winfo_rootx()
-                        y_pane = y_root - tk_panedwindow.winfo_rooty()
+                        # y_pane = y_root - tk_panedwindow.winfo_rooty()
                         for sash_index in range(len(tk_panedwindow.panes())-1):
                             if x_pane < tk_panedwindow.sash_coord(sash_index)[0]:
                                 tk_frame = tk_panedwindow.panes()[sash_index]
@@ -230,7 +230,7 @@ class UserForm:
                         for m_possible_notebook_frame in self.widgets.widget_list:
                             if (m_possible_notebook_frame.parent == possible_m_widget.name and
                                     str(possible_m_widget.tk_name.select()) == str(m_possible_notebook_frame.tk_name)):
-                                tk_nb = possible_m_widget.tk_name
+                                # tk_nb = possible_m_widget.tk_name
                                 # found frame in notebook, m_possible_notebook_frame
                                 possible_m_widget_in_frame, possible_grid_location =\
                                     self.find_grid_location(m_possible_notebook_frame, x_root, y_root)
@@ -424,7 +424,11 @@ class UserForm:
                         self.proposed_widget.bind('<Motion>', self.user_motion_callback)
                         self.proposed_widget.bind('<Button-1>', self.inserted_widget_click)
 
-                        widget_under_mouse.destroy()
+                        if isinstance(widget_under_mouse, ttk.Label):
+                            widget_under_mouse.destroy()
+                        else:
+                            raise Exception(f'widget under mouse should be a ttk.Label but'
+                                            f' {type(widget_under_mouse)} found')
 
                 # replace old proposed widget with filler label (including if mouse moved out of user_frame)
                 # print('here:', old_proposed_widget_location)
@@ -459,7 +463,6 @@ class UserForm:
                         self.resize_paned_window(parent_widget)
 
     def resize_paned_window(self, tk_paned_window: tkinter.PanedWindow):
-        #print(tk_paned_window)
         column, row = tk_paned_window.grid_info()['column'], tk_paned_window.grid_info()['row']
         tk_paned_window.grid_forget()
         p_pane_list = []
@@ -468,12 +471,12 @@ class UserForm:
             tk_paned_window.forget(p_pane_list[-1].tk_name)
             tk_widget_list = []
             tk_widget_row = []
-            tk_widget_column = []
+            # tk_widget_column = []
             for tk_widget in p_pane_list[-1].tk_name.winfo_children():
                 tk_widget_list.append(tk_widget)
-                #print(tk_widget)
+                # print(tk_widget)
                 tk_widget_row.append(tk_widget.grid_info()['row'])
-            #print(p_pane_list[-1])
+            # print(p_pane_list[-1])
         for p_pane in p_pane_list:
             tk_paned_window.add(p_pane.tk_name)
         tk_paned_window.grid(row=row, column=column)

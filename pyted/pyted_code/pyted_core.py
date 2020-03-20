@@ -325,7 +325,7 @@ class PytedCore:
 
             elif widget_under_mouse in self.user_form.filler_labels:
                 selected_widget_parent = self.widgets.find_pyte_parent(self.selected_widget)
-                paned_window_parent_forgotten = self.user_form.forget_paned_window_parent(widget_under_mouse)
+                # paned_window_parent_forgotten = self.user_form.forget_paned_window_parent(widget_under_mouse)
                 if (isinstance(self.selected_widget, pyted_widget_types.Frame) and
                         isinstance(selected_widget_parent, pyted_widget_types.Notebook)):
                     # remove tab from Notebook (if there is more than one)
