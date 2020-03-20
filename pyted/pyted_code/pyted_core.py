@@ -1,6 +1,6 @@
 import tkinter
 from tkinter import ttk
-from typing import Union
+from typing import Union, List
 from tkinter import filedialog, messagebox
 
 import pyted.monet_widget_types as pyted_widget_types
@@ -58,7 +58,7 @@ class PytedCore:
         # self.toolbox = None
 
     def update_widget_attribute(self, pyte_widget: Pyted_Widget_Type, attr: str,
-                                new_value: Union[str, bool],
+                                new_value: Union[str, bool, List[str]],
                                 init=False) -> Union[None, tuple]:
         """Update a widget attribute with a new value
 

@@ -34,6 +34,7 @@ GRID_REMOVE = 'grid_remove'
 NO_INPUT = 'no input'                           # the attribute will be hidden from the user as there is no input
 SINGLE_INPUT = 'single input'                   # single input in the form of text
 BOOL_INPUT = 'bool input'                       # input is True or False
+LIST_INPUT = 'list input'                       # multiple items in the form of a list, limited to text
 SINGLE_OPTION = 'single option'                 # single input from a list of options
 MULTI_OPTION = 'multi option'                   # multiple inputs from a list of options
 PARENT_OPTION = 'parent option'                 # single input from a list of available container widgets
@@ -57,10 +58,19 @@ COLUMN_CONFIGURE = 'columnconfigure'
 def make_empty_dict():
     """A factory method to return an empty dictionary.
 
-    :return: and empty dictionary
+    :return: an empty dictionary
     """
 
     return {}
+
+
+def make_default_list():
+    """A factory method to return an default list of colours.
+
+    :return: list of colours
+    """
+
+    return ['red', 'yellow', 'blue']
 
 
 @dataclass
@@ -579,6 +589,31 @@ class TtkEntry(PytedPlacedWidget):
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Entry(self.{self.parent})\n'
+        return code
+
+
+@dataclass
+class TtkCombobox(PytedPlacedWidget):
+
+    # class attributes (or as close as we can get to class attributes)
+    type: type = field(default=ttk.Combobox, init=False)
+    tab: str = field(default='ttk', init=False)
+    label: str = field(default='Combobox', init=False)
+
+    # instance attributes
+    state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                         'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
+    values: str = field(default_factory=make_default_list, metadata={'type': LIST_INPUT, 'template': CONFIG_CODE,
+                                                                       'options': None})
+    textvariable: str = field(default='', metadata={'type': STRING_VAR_OPTION, 'template': CONFIG_CODE,
+                                                    'options': None})
+    # event attributes
+    combobox_selected: str = field(default='', metadata={'type': STRING_EVENT_OPTION,
+                                                         'template': '<<ComboboxSelected>>',
+                                                         'options': None})
+
+    def generate_code(self):
+        code = f'self.{self.name} = ttk.Combobox(self.{self.parent})\n'
         return code
 
 

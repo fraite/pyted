@@ -77,6 +77,22 @@ class AttributeFrame:
                            self.attr_entry_callback(event, arg1, arg2, arg3)
                            )
                     self.attr_widgets.append(e)
+                elif v == pyted_widget_types.LIST_INPUT:
+                    widget_attr = getattr(selected_pyte_widget, k)
+                    e = ttk.Entry(property_frame, takefocus=True)
+                    e.grid(row=property_row, column=1, sticky='NWES')
+                    e.insert(0, str(widget_attr))
+                    # self.pyted_core.entry_attr.bind("<Return>", self.pyted_core.pyte_code.attr_entry_changed)
+                    # self.pyted_core.entry_attr.bind("<FocusOut>", self.pyted_core.pyte_code.attr_entry_changed)
+                    e.bind("<Return>", lambda
+                           event, arg1=k, arg2=e, arg3=selected_widget:
+                           self.attr_list_entry_callback(event, arg1, arg2, arg3)
+                           )
+                    e.bind("<FocusOut>", lambda
+                           event, arg1=k, arg2=e, arg3=selected_widget:
+                           self.attr_list_entry_callback(event, arg1, arg2, arg3)
+                           )
+                    self.attr_widgets.append(e)
                 elif v == pyted_widget_types.SINGLE_OPTION:
                     widget_attr = getattr(selected_pyte_widget, k)
                     cb = ttk.Combobox(property_frame)
@@ -326,10 +342,39 @@ class AttributeFrame:
         self.handles.place_selected_widget_handles(selected_widget.tk_name)
 
     # called when an attribute entry box lost focus or return presses
-    def attr_entry_callback(self, _event, attrib, entrybox, selected_widget):
+    def attr_entry_callback(self, _event, attrib, entry_box, selected_widget):
         if selected_widget is not None:
-            return_value = self.pyted_core.update_widget_attribute(selected_widget,
-                                                                   attrib, entrybox.get())
+            return_value = self.pyted_core.update_widget_attribute(selected_widget, attrib, entry_box.get())
+            # self.update_attr_frame()
+            if selected_widget.tk_name is not None:
+                self.handles.place_selected_widget_handles(selected_widget.tk_name)
+            if return_value is not None:
+                messagebox.showwarning('Renaming problem',
+                                       'Name already exists for another widget and Name not changed')
+
+    # called when an attribute entry box expecting a list (e.g. values for combobox) lost focus or return presses
+    def attr_list_entry_callback(self, _event, attrib, entry_box: ttk.Entry, selected_widget):
+        if selected_widget is not None:
+            values: str = entry_box.get()
+            values.strip(' ')
+            if values.startswith('[') and values.endswith(']'):
+                values = values[1:-1].strip(' ')
+                value_list = []
+                while len(values) > 0:
+                    if values[0] == "'":
+                        next_value = values[1:].split("'")[0]
+                        value_list.append(next_value)
+                        values = values[(2 + len(next_value)):].strip(' ')
+                        if values.startswith(','):
+                            values = values[1:].strip(' ')
+                    else:
+                        entry_box.delete(0, tkinter.END)
+                        entry_box.insert(0, str(getattr(selected_widget, attrib)))
+                        raise Exception('entry should be a list of str, comma separated')
+
+            else:
+                value_list = [values]
+            return_value = self.pyted_core.update_widget_attribute(selected_widget, attrib, value_list)
             # self.update_attr_frame()
             if selected_widget.tk_name is not None:
                 self.handles.place_selected_widget_handles(selected_widget.tk_name)

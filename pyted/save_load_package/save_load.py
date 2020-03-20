@@ -153,6 +153,8 @@ def place_widgets(code, m_parent_widget, widget_list):
                     if attr == 'textvariable' or attr == 'variable':
                         if attr_value != '':
                             code = code + f'        self.{pyte_widget.name}.config({attr}=self.{attr_value})\n'
+                    elif isinstance(attr_value, list):
+                        code = code + f'        self.{pyte_widget.name}.config({attr}={attr_value})\n'
                     else:
                         code = code + f'        self.{pyte_widget.name}.config({attr}="{attr_value}")\n'
                 elif attr_template == monet_widget_types.GRID_CODE:
@@ -462,7 +464,13 @@ def load_widget_attr(f, widget, current_line2):
         attr_name = current_line2[method_name_length:-1].split('=')[0]
         if attr_name == 'textvariable' or attr_name == 'variable':
             attr_value = current_line2[method_name_length:-1].split('=')[1][5:]
+        elif current_line2[method_name_length:-1].split('=')[1].startswith('['):
+            # list found
+            attr_value = []
+            for item in current_line2[method_name_length:-1].split('=')[1][1:-1].split(', '):
+                attr_value.append(item[1:-1])
         else:
+            # assume it is a string
             attr_value = current_line2[method_name_length:-1].split('=')[1][1:-1]
         setattr(widget, attr_name, attr_value)
     elif current_line2.startswith(monet_widget_types.GRID_CODE + '('):
