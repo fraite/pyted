@@ -228,7 +228,10 @@ class PytedCore:
             if init:
                 # when user form is drawn the tk_name will be handled by user form initialisation code
                 return
-            self.widgets.find_tk_parent(pyte_widget).tab(pyte_widget.tk_name, text=new_value)
+            tk_parent = self.widgets.find_tk_parent(pyte_widget)
+            if isinstance(tk_parent, ttk.Notebook):
+                tk_parent.tab(pyte_widget.tk_name, text=new_value)
+            # self.widgets.find_tk_parent(pyte_widget).tab(pyte_widget.tk_name, text=new_value)
             return
 
         elif attr_template == pyted_widget_types.BESPOKE_CODE and attr == 'tk_name':

@@ -603,7 +603,7 @@ class PanedWindow(PytedPlacedWidget, PytedContainerWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=tkinter.PanedWindow, init=False)
-    # tab turned off so does not display
+    # TODO: tab turned off so does not display
     # tab: str = field(default='tkinter', init=False)
     label: str = field(default='PanedWindow', init=False)
 
