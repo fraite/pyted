@@ -386,6 +386,8 @@ class TopLevel(PytedGridContainerWidget):
     label: str = field(default='Toplevel', init=False)
 
     # instance attributes
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     comment: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': BESPOKE_CODE, 'options': None})
     window_title: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': TITLE_CODE, 'options': None})
     # padx: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -410,6 +412,8 @@ class Label(PytedPlacedWidget):
     label: str = field(default='Label', init=False)
 
     # instance attributes
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     anchor: str = field(default=tkinter.E, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                      'options': (tkinter.N, tkinter.NE, tkinter.E, tkinter.SE,
                                                                  tkinter.S, tkinter.SW, tkinter.W, tkinter.NW,
@@ -435,6 +439,7 @@ class Entry(PytedPlacedWidget):
     label: str = field(default='Entry', init=False)
 
     # instance attributes
+    width: str= field(default='20', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                          'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
@@ -460,6 +465,8 @@ class Button(PytedPlacedWidget):
     label: str = field(default='Button', init=False)
 
     # instance attributes
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     relief: str = field(default=tkinter.RAISED, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                           'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
@@ -484,6 +491,8 @@ class Radiobutton(PytedPlacedWidget):
     label: str = field(default='Radiobutton', init=False)
 
     # instance attributes
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     relief: str = field(default=tkinter.FLAT, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                         'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
@@ -511,6 +520,8 @@ class Checkbutton(PytedPlacedWidget):
     label: str = field(default='Checkbutton', init=False)
 
     # instance attributes
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     relief: str = field(default=tkinter.FLAT, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                         'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
@@ -539,6 +550,8 @@ class Frame(PytedGridContainerWidget, PytedPlacedWidget):
     label: str = field(default='Frame', init=False)
 
     # instance attributes
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     borderwidth: str = field(default='2', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     relief: str = field(default=tkinter.GROOVE, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                           'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
@@ -559,6 +572,7 @@ class TtkLabel(PytedPlacedWidget):
     label: str = field(default='TLabel', init=False)
 
     # instance attributes
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     anchor: str = field(default=tkinter.E, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                      'options': (tkinter.N, tkinter.NE, tkinter.E, tkinter.SE,
                                                                  tkinter.S, tkinter.SW, tkinter.W, tkinter.NW,
@@ -580,6 +594,7 @@ class TtkEntry(PytedPlacedWidget):
     label: str = field(default='TEntry', init=False)
 
     # instance attributes
+    width: str= field(default='20', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                          'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
     textvariable: str = field(default='', metadata={'type': STRING_VAR_OPTION, 'template': CONFIG_CODE,
@@ -601,10 +616,11 @@ class TtkCombobox(PytedPlacedWidget):
     label: str = field(default='Combobox', init=False)
 
     # instance attributes
+    width: str= field(default='20', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
     state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                          'options': (tkinter.NORMAL, tkinter.DISABLED, 'readonly')})
     values: str = field(default_factory=make_default_list, metadata={'type': LIST_INPUT, 'template': CONFIG_CODE,
-                                                                       'options': None})
+                                                                     'options': None})
     textvariable: str = field(default='', metadata={'type': STRING_VAR_OPTION, 'template': CONFIG_CODE,
                                                     'options': None})
     # event attributes
@@ -627,6 +643,8 @@ class Notebook(PytedPlacedWidget, PytedContainerWidget):
 
     # instance attributes
     tk_name: ttk.Notebook = field(default=None, metadata={'type': NO_INPUT, 'template': BESPOKE_CODE, 'options': None})
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Notebook(self.{self.parent})\n'
@@ -645,6 +663,8 @@ class PanedWindow(PytedPlacedWidget, PytedContainerWidget):
     # instance attributes
     tk_name: ttk.PanedWindow = field(default=None, metadata={'type': NO_INPUT, 'template': BESPOKE_CODE,
                                                              'options': None})
+    height: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str= field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = tkinter.PanedWindow(self.{self.parent})\n'
