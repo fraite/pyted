@@ -533,7 +533,9 @@ class UserForm:
             else:
                 # may need to deselect widget if mouse not moved
                 self.widget_to_deselect_if_not_moved = pyte_widget
-            return
+            # stop tkinter from setting focus on selected widget as this will allow data entry into widget
+            self.pyted_core.navigator_tree.focus_set()
+            return 'break'
         elif (self.pyted_core.widget_in_toolbox_chosen is monet_widget_types.Frame and
               isinstance(pyte_widget, monet_widget_types.Notebook)):
             self.pyted_core.insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
@@ -566,3 +568,6 @@ class UserForm:
         self.pyted_core.insert_widget(self.pyted_core.widget_in_toolbox_chosen(), self.proposed_widget,
                                       self.proposed_widget_frame,
                                       self.proposed_widget_location)
+        # stop tkinter from setting focus on selected widget as this will allow data entry into widget
+        self.pyted_core.navigator_tree.focus_set()
+        return 'break'
