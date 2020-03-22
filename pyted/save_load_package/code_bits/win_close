@@ -15,3 +15,12 @@
                         pass
                 gui_binder.win_close()
         self.{top_level_name}.destroy()
+
+    def win_close_cancel(self):
+        gui_binder = getattr(self, 'gui_binder', None)
+        if gui_binder is not None:
+            if isinstance(gui_binder, dict):
+                pass
+            else:
+                gui_binder.win_close()
+        self.{top_level_name}.destroy()
