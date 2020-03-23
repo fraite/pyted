@@ -224,6 +224,12 @@ class PytedCore:
                 return
             return
 
+        elif attr_template == pyted_widget_types.BESPOKE_CODE and (attr == 'win_close'):
+            if init:
+                # when user form is drawn the tk_name will be handled by user form initialisation code
+                return
+            return
+
         elif attr_template == pyted_widget_types.BESPOKE_CODE and (attr == 'tab_text'):
             if init:
                 # when user form is drawn the tk_name will be handled by user form initialisation code

@@ -1,8 +1,11 @@
     if gui_binder is None or isinstance(gui_binder, dict):
-        result_dict = {}
-        for key in vars(appl):
-            if isinstance(getattr(appl, key), tkinter.StringVar):
-                result_dict[key] = getattr(appl, key).get()
+        if appl._cancel:
+            result_dict = {}
+        else:
+            result_dict = {}
+            for key in vars(appl):
+                if isinstance(getattr(appl, key), tkinter.StringVar):
+                    result_dict[key] = getattr(appl, key).get()
         return result_dict
     else:
         return appl

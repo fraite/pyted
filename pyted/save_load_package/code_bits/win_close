@@ -1,26 +1,34 @@
-    def win_close(self):
+    def win_close_ok(self):
+        self._cancal = False
         gui_binder = getattr(self, 'gui_binder', None)
-        if gui_binder is not None:
-            if isinstance(gui_binder, dict):
-                for key in gui_binder:
-                    try:
-                        gui_binder[key] = getattr(self, key).get()
-                    except AttributeError:
-                        pass
-            else:
-                for key in vars(gui_binder):
-                    try:
-                        setattr(gui_binder, key, getattr(self, key).get())
-                    except AttributeError:
-                        pass
-                gui_binder.win_close()
-        self.{top_level_name}.destroy()
+        if gui_binder is None:
+            pass
+        elif isinstance(gui_binder, dict):
+            for key in gui_binder:
+                try:
+                    gui_binder[key] = getattr(self, key).get()
+                except AttributeError:
+                    pass
+        elif isinstance(gui_binder, GuiBinder):
+            for key in vars(gui_binder):
+                try:
+                    setattr(gui_binder, key, getattr(self, key).get())
+                except AttributeError:
+                    pass
+            gui_binder.win_close()
+        else:
+            raise Exception('gui_binder not None, dict or GuiBinder')
+        self.gui_1.destroy()
 
     def win_close_cancel(self):
+        self._cancel = True
         gui_binder = getattr(self, 'gui_binder', None)
-        if gui_binder is not None:
-            if isinstance(gui_binder, dict):
-                pass
-            else:
-                gui_binder.win_close()
-        self.{top_level_name}.destroy()
+        if gui_binder is None:
+            pass
+        elif isinstance(gui_binder, dict):
+            pass
+        elif isinstance(gui_binder, GuiBinder):
+            gui_binder.win_close()
+        else:
+            raise Exception('gui_binder not None, dict or GuiBinder')
+        self.gui_1.destroy()

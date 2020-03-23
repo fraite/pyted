@@ -395,6 +395,8 @@ class TopLevel(PytedGridContainerWidget):
     relief: str = field(default=tkinter.FLAT, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
                                                         'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
                                                                     tkinter.GROOVE)})
+    win_close: str = field(default='ok', metadata={'type': SINGLE_OPTION, 'template': BESPOKE_CODE,
+                                                   'options': ('ok', 'cancel')})
 
     def generate_code(self):
         # TODO: Sort out if and how TopLevel is used

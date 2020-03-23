@@ -42,6 +42,7 @@ def generate_code(widgets: Widgets) -> str:
     code = code + f'    """{parent_widget}"""\n'
     code = code + f'\n'
     code = code + f'    def __init__(self, gui_binder=None, parent=None, modal=True):\n'
+    code = code + f'        self._cancel = None\n'
     code = code + f'        self.gui_binder = gui_binder\n'
     code = code + f'        self.parent = parent\n'
 
@@ -57,16 +58,6 @@ def generate_code(widgets: Widgets) -> str:
     code = code + f'            # generate top level window\n'
     code = code + f'            top_level = tkinter.Toplevel(parent)\n'
 
-    code = place_widgets(code, None, widget_list)
-    code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close)'
-    code = code + f'\n'
-    code = code + f'\n'
-
-    code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'widget_init_end')
-    code = code + code_bit
-    code = code + f'\n'
-    code = code + f'\n'
-
     # find top level widget
     top_level_widget = None
     # TODO: change to filter
@@ -74,6 +65,19 @@ def generate_code(widgets: Widgets) -> str:
         if pyted_widget.label == 'Toplevel':
             top_level_widget = pyted_widget
             break
+
+    code = place_widgets(code, None, widget_list)
+    if top_level_widget.win_close == 'ok':
+        code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close_ok)'
+    else:
+        code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)'
+    code = code + f'\n'
+    code = code + f'\n'
+
+    code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'widget_init_end')
+    code = code + code_bit
+    code = code + f'\n'
+    code = code + f'\n'
 
     code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'win_close')
     code_bit = code_bit.replace('{top_level_name}', top_level_widget.name)
@@ -182,6 +186,8 @@ def place_widgets(code, m_parent_widget, widget_list):
                     attr_value = getattr(pyte_widget, attr)
                     if attr_value:
                         code = code + f'        self.{pyte_widget.name}.grid_remove()\n'
+                elif attr_template == monet_widget_types.BESPOKE_CODE and attr == 'win_close':
+                    pass
                 elif attr_template == monet_widget_types.VAR_SET_CODE:
                     code = code + f'        self.{pyte_widget.name}.set("{pyte_widget.set}")\n'
                     code = code + f'        init_tk_var(self.{pyte_widget.name}, gui_binder,' \
@@ -271,6 +277,14 @@ def parse_code(f):
             pass
         else:
             break
+
+    # read in self._cancel = None line
+    current_line2 = current_line.strip()
+    if current_line2 == 'self._cancel = None':
+        pass
+    else:
+        raise Exception('"self._cancel = None" missing')
+    current_line = f.readline()
 
     widgets = []
     # TODO: use one loop to load all types of widgets
@@ -411,6 +425,7 @@ def parse_code(f):
             break
         current_line = f.readline()
     widgets.append(widget)
+    top_level_widget = widget
 
     # read in other widgets
     while not current_line2.startswith('top_level.protocol') and not current_line2.startswith('def'):
@@ -448,6 +463,17 @@ def parse_code(f):
                 current_line = f.readline()
                 current_line2 = current_line.strip()
         widgets.append(widget)
+
+    # read in lines until find top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)
+    while not current_line2.startswith('top_level.protocol("WM_DELETE_WINDOW",'):
+        current_line = f.readline()
+        current_line2 = current_line.strip()
+    if current_line2.startswith('top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)'):
+        top_level_widget.win_close = 'cancel'
+    elif current_line2.startswith('top_level.protocol("WM_DELETE_WINDOW", self.win_close_ok)'):
+        top_level_widget.win_close = 'ok'
+    else:
+        raise Exception('win_close neither True or False')
 
     return widgets
 
