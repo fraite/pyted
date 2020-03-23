@@ -68,7 +68,7 @@ def generate_code(widgets: Widgets) -> str:
 
     code = place_widgets(code, None, widget_list)
     if top_level_widget.win_close == 'ok':
-        code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close_ok)'
+        code = code + f'        top_level.protocol("WM_DELETE_WINDOW", lambda: self.win_close_ok(False))'
     else:
         code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)'
     code = code + f'\n'
@@ -157,6 +157,12 @@ def place_widgets(code, m_parent_widget, widget_list):
                     if attr == 'textvariable' or attr == 'variable':
                         if attr_value != '':
                             code = code + f'        self.{pyte_widget.name}.config({attr}=self.{attr_value})\n'
+                    elif attr == 'command':
+                        if attr_value == 'win_close_cancel':
+                            code = code + f'        self.{pyte_widget.name}.config({attr}=self.{attr_value})\n'
+                        else:
+                            code = code + f'        self.{pyte_widget.name}.config({attr}=lambda: ' \
+                                          f'self.{attr_value}("{pyte_widget.name}"))\n'
                     elif isinstance(attr_value, list):
                         code = code + f'        self.{pyte_widget.name}.config({attr}={attr_value})\n'
                     else:
@@ -470,10 +476,8 @@ def parse_code(f):
         current_line2 = current_line.strip()
     if current_line2.startswith('top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)'):
         top_level_widget.win_close = 'cancel'
-    elif current_line2.startswith('top_level.protocol("WM_DELETE_WINDOW", self.win_close_ok)'):
-        top_level_widget.win_close = 'ok'
     else:
-        raise Exception('win_close neither True or False')
+        top_level_widget.win_close = 'ok'
 
     return widgets
 
@@ -490,6 +494,11 @@ def load_widget_attr(f, widget, current_line2):
         attr_name = current_line2[method_name_length:-1].split('=')[0]
         if attr_name == 'textvariable' or attr_name == 'variable':
             attr_value = current_line2[method_name_length:-1].split('=')[1][5:]
+        elif attr_name == 'command':
+            if current_line2[method_name_length:-1].split('=')[1][:7] == 'lambda:':
+                attr_value = 'win_close_ok'
+            else:
+                attr_value = current_line2[method_name_length:-1].split('=')[1][5:]
         elif current_line2[method_name_length:-1].split('=')[1].startswith('['):
             # list found
             attr_value = []

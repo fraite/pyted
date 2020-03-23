@@ -1,5 +1,5 @@
-    def win_close_ok(self):
-        self._cancal = False
+    def win_close_ok(self, text):
+        self._cancel = text
         gui_binder = getattr(self, 'gui_binder', None)
         if gui_binder is None:
             pass

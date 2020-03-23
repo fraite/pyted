@@ -474,6 +474,8 @@ class Button(PytedPlacedWidget):
                                                           'options': (tkinter.FLAT, tkinter.RAISED, tkinter.SUNKEN,
                                                                       tkinter.GROOVE)})
     text: str = field(default='', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    command: str = field(default='win_close_ok', metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                           'options': ('win_close_ok', 'win_close_cancel')})
     button_1: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Button-1>', 'options': None})
 
     def generate_code(self):

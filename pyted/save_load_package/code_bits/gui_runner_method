@@ -1,8 +1,8 @@
     if gui_binder is None or isinstance(gui_binder, dict):
-        if appl._cancel:
+        if appl._cancel == True:
             result_dict = {}
         else:
-            result_dict = {}
+            result_dict = {'_button': appl._cancel}
             for key in vars(appl):
                 if isinstance(getattr(appl, key), tkinter.StringVar):
                     result_dict[key] = getattr(appl, key).get()
