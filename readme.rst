@@ -17,7 +17,7 @@ Download the pyted package from Github.
 
 Use
 ===
-Run "pyted_runner.py" in the "pyted" package.
+Run pyted.py script in the root package.
 
 For more information see the "quick_start" document in the "docs" directory.
 

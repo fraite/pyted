@@ -9,7 +9,7 @@ the program.
 
 Installing the program
 ======================
-Download or clone the pyted package, or the entire github repository. Make sure that Python 3.7 or a newer version is
+Download or clone the entire github repository. Make sure that Python 3.7 or a newer version is
 installed on your machine.
 
 Running the program
