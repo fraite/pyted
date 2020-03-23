@@ -158,7 +158,9 @@ def place_widgets(code, m_parent_widget, widget_list):
                         if attr_value != '':
                             code = code + f'        self.{pyte_widget.name}.config({attr}=self.{attr_value})\n'
                     elif attr == 'command':
-                        if attr_value == 'win_close_cancel':
+                        if attr_value == '':
+                            pass
+                        elif attr_value == 'win_close_cancel':
                             code = code + f'        self.{pyte_widget.name}.config({attr}=self.{attr_value})\n'
                         else:
                             code = code + f'        self.{pyte_widget.name}.config({attr}=lambda: ' \

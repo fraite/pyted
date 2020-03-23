@@ -142,7 +142,7 @@ class AttributeFrame:
                     cb.configure(state='readonly')
                     cb.grid(row=property_row, column=1, columnspan=1, sticky=tkinter.EW)
                     cb.set(widget_attr)
-                    var_widgets = []
+                    var_widgets = ['']
                     for widget in self.widgets.widget_list:
                         if isinstance(widget, pyted_widget_types.StringVar):
                             var_widgets.append(widget.name)
