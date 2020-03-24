@@ -17,7 +17,9 @@ Running the program
 Run the pyted.py script in python. The pyted GUI should appear.
 
 
-![test image](pictures\character_gui.png)
+.. image:: character_gui.png
+  ::width: 400
+  :alt: alternative text
 
 Designing a new user window
 ===========================
