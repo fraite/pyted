@@ -7,4 +7,3 @@ def main():
 
 if __name__ == '__main__':
     pyted_runner.run()
-
