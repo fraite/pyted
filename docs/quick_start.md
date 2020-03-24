@@ -12,9 +12,9 @@ installed on your machine.
 Run the pyted.py script in python. The pyted GUI should appear.
 
 
-![Image des](pictures/character_gui.png)
+![Start page](pictures/1-start_page.png)
 
-# Designing a new user window
+# Designing a new user GUI
 
 The pyted GUI is divided into 3 columns: the centre column shows the design frame
 that the user is designing, the left column has a widget navigator that shows all the widgets in the user form, and
@@ -24,7 +24,11 @@ the right hand column shows a widget picker and a list of all attributes of the 
 
 To add a new widget to the design frame, select a widget from the widget picker in the top right of the program GUI.
 Tabs
-collect widget types together so that they can be easily found. For example the "Label" widget is found under the
+collect widget types together so that they can be easily found.
+ 
+![Widget picker](pictures/2-added_entry-annotated.png)
+ 
+ For example the "Label" widget is found under the
 "tkinter" tab and the ttk version of the widget "TLabel" is found under the "ttk" tab. Press the "Label" button in the
 "tkinter" tab and move the mouse over the design frame (the square in the centre of the program GUI
 with dots). A label widget will appear under the mouse on the design frame and will move around as the user moves the
@@ -79,7 +83,12 @@ by having the same tkinter variable associated to all the Radiobutton widgets in
 ## Loading and Saving user forms
 
 The created user form can then be save by going into the file menu and selecting the save menu item. Loading previously
-saved user forms is also a menu item under the file menu.
+saved user forms is also a menu item under the file menu. For example it is possible to load "character_gui.py" from
+the sample directory of pyted.
+
+![character_gui.py](pictures/character_gui.png) 
+
+The character_gui shows the use of a number of different widgets and tkinter variables.
 
 # Using saved user forms
 
@@ -87,20 +96,20 @@ The saved file is actually a Python script that can be run or loaded as a module
 modules other than tkinter so should not have any dependencies. Additionally this script can work with any version of
 Python 3 and does not need Python 3.7 or newer. An example of a saved file is given in the "samples" directory in the
 file
-"python_actors.py".
+"character_gui.py".
 
 When the saved file is run as a script it will display the user form and then print all the tkinter variables defined.
 To make use of the saved file it can be imported by another Python 3 script. There are a number of ways to do this and
-these can be seen in the "python_actors_runner.py" file, found in the sample directory.
+these can be seen in the "character_runner.py" file, found in the sample directory.
 
 ## Dictionary dialogue box method
 
 Once the saved file is imported, the user form can be called by a function call. For example, to use the
 "python_actors.py" file in the sample directory::
 
-    import samples.python_actors as python_actors
-    app = python_actors.gui_1()
-    print(app)
+    import samples.character_gui as character_gui
+    gui = character_gui.gui_1()
+    print(gui)
 
 The above example will show the python_actors gui and wait for the user to interact with the gui before closing the gui.
 Once closed, all the tkinter variables defined in the gui will be returned in the form of a dictionary. By associating
@@ -113,52 +122,15 @@ The default values in the python_actors gui will be defined by the set value of 
 The input dictionary dialogue box method is similar to the dictionary dialogue box method but a dictionary object is
 passed as an argument in the function to define the default values::
 
-    import samples.python_actors as python_actors
-    my_dict = {'first_name': 'Terry', 'country': 'USA'}
-    app = python_actors.gui_1(my_dict)
+    import samples.character_gui as character_gui
+
+    my_dict = {'first_name': 'Henry', 'country': 'USA'}
+    gui = character_gui.gui_1(my_dict)
     print(my_dict)
-    print(app)
 
 The above example puts the default values in the my_dict dictionary and uses this dictionary as an argument in the
 function call. The my_dict object is changed by gui_1() function and the my_dict value takes on the values as selected
-by the user in the dialogue box. Since the my_dict dictionary does not have all the tkinter variables in the dialogue
-box it does not return all the values set by the user. These can be found in the dictionary returned by the gui_1()
-function.
-
-## Input Object dialogue box method
-
-Rather than pass a dictionary into the gui_1(arg) function, an bespoke object can be passed. This object can be any
-object where some of the attributes align with the tkinter variable names. It is useful to use the object defined in the
-pyted save file. For the python_actors.py module, this is::
-
-    class GuiBinder:
-        """binder for GuiCollection"""
-
-        def __init__(self):
-            pass
-            self.first_name = ""
-            self.surname = ""
-            self.country = "UK"
-            self.writer = "1"
-            self.director = "0"
-            self.actor = "1"
-
-        def entry1_button_1(self, obj, event):
-            return
-
-        def win_close(self):
-            pass
-
-This code can be copied from the pyted save file and pasted into the user code. The user can then create objects and
-pass these objects to the gui_1(arg) function, along the lines::
-
-    gui_binder = GuiBinder()
-    gui_binder.first_name = 'First Name'
-    _app = python_actors.gui_1(gui_binder)
-    print(gui_binder.first_name)
-
-The gui_1() function will modify the gui_binder object with the user selected values. Note that the object can also be
-used to bind functions to events...
+by the user in the dialogue box.
 
 # Conclusions
 

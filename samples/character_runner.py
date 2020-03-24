@@ -1,4 +1,3 @@
-import tkinter
 import samples.character_gui as character_gui
 
 
