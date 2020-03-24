@@ -1,9 +1,9 @@
-from pyted import pyted_runner
+from pyted.pyted_code.pyted_core import PytedCore
 
 
 def main():
-    pyted_runner.run()
+    PytedCore()
 
 
 if __name__ == '__main__':
-    pyted_runner.run()
+    x = PytedCore()
