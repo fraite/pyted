@@ -16,6 +16,9 @@ Running the program
 ===================
 Run the pyted.py script in python. The pyted GUI should appear.
 
+
+![test image](pictures\character_gui.png)
+
 Designing a new user window
 ===========================
 
