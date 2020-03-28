@@ -102,20 +102,28 @@ When the saved file is run as a script it will display the user form and then pr
 To make use of the saved file it can be imported by another Python 3 script. There are a number of ways to do this and
 these can be seen in the "character_runner.py" file, found in the sample directory.
 
+## Adding code directly to the saved file
+
+It is fairly simple to add python code to add extra functionality. This has the disadvantage that if any changes
+need to be made to the gui it will no longer be possible to use pyted to make the change. The methods below allow
+changes to be made to the gui if required in the future if changes are needed. The methods also promote separation
+of gui code from the logic of the program, which is generally considered good coding style.
+
 ## Dictionary dialogue box method
 
 Once the saved file is imported, the user form can be called by a function call. For example, to use the
-"python_actors.py" file in the sample directory::
+"python_characters.py" file in the sample directory::
 
     import samples.character_gui as character_gui
     gui = character_gui.gui_1()
     print(gui)
 
-The above example will show the python_actors gui and wait for the user to interact with the gui before closing the gui.
+The above example will show the python_characters gui and wait for the user to interact with the gui before
+closing the gui.
 Once closed, all the tkinter variables defined in the gui will be returned in the form of a dictionary. By associating
 widgets with tkinter variables the states of the widgets in the gui is discovered.
 
-The default values in the python_actors gui will be defined by the set value of the tkinter variables.
+The default values in the python_characters gui will be defined by the set value of the tkinter variables.
 
 ## Input dictionary dialogue box method
 
@@ -131,6 +139,16 @@ passed as an argument in the function to define the default values::
 The above example puts the default values in the my_dict dictionary and uses this dictionary as an argument in the
 function call. The my_dict object is changed by gui_1() function and the my_dict value takes on the values as selected
 by the user in the dialogue box.
+
+By using the returned value (gui in the above example) rather than looking at the input dict (my_dict in the 
+above example) the state of the gui can be reviewed, including which button has been pressed. This is can be
+demonstrated by replacing the last print statement as shown below.
+
+    import samples.character_gui as character_gui
+
+    my_dict = {'first_name': 'Henry', 'country': 'USA'}
+    gui = character_gui.gui_1(my_dict)
+    print(gui)
 
 # Conclusions
 
