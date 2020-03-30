@@ -228,7 +228,7 @@ def parse_code(f):
         current_line = f.readline()
         if current_line.startswith('import') or current_line.startswith('from'):
             pass
-        elif current_line.strip() == '':
+        elif current_line == '\n':
             pass
         else:
             break
@@ -244,6 +244,8 @@ def parse_code(f):
     # ignore binder class and any other lines until GUI class starts
     while True:
         current_line = f.readline()
+        if current_line == '':
+            break
         if current_line.startswith('class'):
             break
 

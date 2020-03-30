@@ -29,6 +29,9 @@ class PytedWindow:
         file_menu = tkinter.Menu(self.menu, tearoff=0)
         file_menu.add_command(label='Load', command=pyte_code.menu_file_load)
         file_menu.add_command(label='Save', command=pyte_code.menu_file_save)
+        # TODO: fix or remove this
+        file_menu.add_separator()
+        file_menu.add_command(label='Load module', command=pyte_code.menu_module_load)
         file_menu.add_separator()
         file_menu.add_command(label='preview', command=pyte_code.menu_preview)
         file_menu.add_separator()

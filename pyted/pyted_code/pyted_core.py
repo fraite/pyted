@@ -1,3 +1,7 @@
+# import os
+# import importlib.util
+import ast
+
 import tkinter
 from tkinter import ttk
 from typing import Union, List
@@ -19,6 +23,13 @@ Pyted_Widget_Type = Union[pyted_widget_types.PytedWidget, pyted_widget_types.Pyt
 # update is_pyte_container if Pyte_Container_Type changed
 Pyted_Container_Type = Union[pyted_widget_types.TopLevel, pyted_widget_types.Frame]
 
+# TODO: fix or remove this
+class NodeVisitor(ast.NodeVisitor):
+    def visit_FunctionDef(self, node: ast.ClassDef):
+        print(f'function: {node.name}')
+
+    def visit_ClassDef(self, node: ast.ClassDef):
+        print(f'ClassDef:  {node.name}')
 
 class PytedCore:
     """A tkinter GUI Editor"""
@@ -581,3 +592,36 @@ class PytedCore:
         gui_class = name_space['GuiCollection']
         # gui = gui_class()
         gui_class()
+
+    # TODO: fix or remove this
+    def menu_module_load(self):
+        root = self.root_window
+        root.filename = filedialog.askopenfilename(initialfile='ddd.py', title="Select file",
+                                                   filetypes=(("python files", "*.py"), ("all files", "*.*")))
+        if not root.filename == '':
+            with open(root.filename) as f:
+                mod = f.read()
+
+        # ast_dump = ast.dump(ast.parse(mod), include_attributes=True)
+        # print(ast_dump)
+
+        tree = ast.parse(mod)
+
+        anal = NodeVisitor()
+
+        anal.visit(tree)
+        anal.visit(tree)
+
+        # print (ast_dump)
+
+            # filename = os.path.split(root.filename)
+            # filepath = os.path.dirname(root.filename) # .replace('/', '\\')
+            # print(filepath, filename[1][:-3])
+
+            # spec = importlib.util.spec_from_file_location(filename[1][:-3], os.path.dirname(root.filename))
+            # print(spec)
+
+            #foo = importlib.util.module_from_spec(spec)
+            #spec.loader.exec_module(foo)
+            # x = foo.MyClass()
+            # print(vars(x))

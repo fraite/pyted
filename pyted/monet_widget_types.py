@@ -612,6 +612,34 @@ class TtkEntry(PytedPlacedWidget):
 
 
 @dataclass
+class Listbox(PytedPlacedWidget):
+
+    # class attributes (or as close as we can get to class attributes)
+    type: type = field(default=tkinter.Listbox, init=False)
+    # TODO implement this
+    # tab: str = field(default='tkinter', init=False)
+    label: str = field(default='Listbox', init=False)
+
+    # instance attributes
+    height: str = field(default='10', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    width: str = field(default='20', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
+    state: str = field(default=tkinter.NORMAL, metadata={'type': SINGLE_OPTION, 'template': CONFIG_CODE,
+                                                         'options': (tkinter.SINGLE, tkinter.DISABLED, 'readonly')})
+    values: str = field(default_factory=make_default_list, metadata={'type': LIST_INPUT, 'template': CONFIG_CODE,
+                                                                     'options': None})
+    textvariable: str = field(default='', metadata={'type': STRING_VAR_OPTION, 'template': CONFIG_CODE,
+                                                    'options': None})
+    # event attributes
+    listbox_selected: str = field(default='', metadata={'type': STRING_EVENT_OPTION,
+                                                        'template': '<<ListboxSelected>>',
+                                                        'options': None})
+
+    def generate_code(self):
+        code = f'self.{self.name} = tkinter(self.{self.parent})\n'
+        return code
+
+
+@dataclass
 class TtkCombobox(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)

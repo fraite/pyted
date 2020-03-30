@@ -43,7 +43,7 @@ class WidgetToolboxNotebook:
         self.toolbox_notebook.add(toolbox_frames[tab], text=tab)
         self.pointer_button = tkinter.Radiobutton(toolbox_frames[tab], text='pointer', indicatoron=0,
                                                   variable=self.widget_in_toolbox_chosen_tk_var,
-                                                  value='pointer')
+                                                  value='pointer', width=11)
         self.pointer_button.invoke()
         self.pointer_button.bind("<Button-1>", self.toolbox_pointer_button_click)
         self.pointer_button.grid(column=0, row=0)
@@ -72,7 +72,7 @@ class WidgetToolboxNotebook:
                     tab = None
                 if tab is not None:
                     try:
-                        new_button = tkinter.Radiobutton(toolbox_frames[tab], text=obj.label,
+                        new_button = tkinter.Radiobutton(toolbox_frames[tab], text=obj.label, width=11,
                                                          variable=self.widget_in_toolbox_chosen_tk_var,
                                                          value=obj.label,
                                                          indicatoron=0)
