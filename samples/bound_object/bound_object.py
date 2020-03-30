@@ -1,3 +1,6 @@
+from pyted.__main__ import main
+
+
 class GuiBinder:
     """binder for GuiCollection"""
 
@@ -16,3 +19,8 @@ class GuiBinder:
 
     def win_close(self):
         pass
+
+
+if __name__ == "__main__":
+    main()
+
