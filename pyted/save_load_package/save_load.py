@@ -57,6 +57,7 @@ def generate_code(widgets: Widgets) -> str:
     code = code + f'                root = parent.master\n'
     code = code + f'            # generate top level window\n'
     code = code + f'            top_level = tkinter.Toplevel(parent)\n'
+    code = code + f'        self.root = root\n'
 
     # find top level widget
     top_level_widget = None
@@ -84,6 +85,8 @@ def generate_code(widgets: Widgets) -> str:
     code = code + code_bit
     code = code + f'\n'
     code = code + f'\n'
+
+    code = build_binder_class(code, widget_list)
 
     code = code + f'def {top_level_widget.name}(gui_binder=None, parent=None, modal=True):\n'
     code = code + f'    appl = {parent_widget}(gui_binder, parent, modal)\n'
@@ -117,11 +120,43 @@ def build_binder_class(code, widgets):
             if attr_template.startswith('<'):
                 attr_value = getattr(pyte_widget, attr)
                 if attr_value != '':
-                    code = code + f'    def {attr_value}(self, obj, event):\n'
+                    code = code + f'    def {attr_value}(self, event, obj):\n'
                     code = code + f'        return\n'
                     code = code + '\n'
     code = code + f'    def win_close(self):\n'
-    code = code + f'        pass\n'
+    code = code + f'        return\n'
+    return code
+
+
+def build_binder_functions(code, widgets):
+
+    # generate event methods
+    for pyte_widget in widgets:
+        for attr, v in pyte_widget.get_code_template().items():
+            attr_template = pyte_widget.get_code_template(attr)
+            if attr_template.startswith('<'):
+                attr_value = getattr(pyte_widget, attr)
+                if attr_value != '':
+                    code = code + f'    def {attr_value}(self, event, obj):\n'
+                    code = code + f'        gui_binder = getattr(self, "gui_binder", None)\n'
+                    code = code + f'        if gui_binder is not None and not isinstance(gui_binder, dict):\n'
+                    code = code + f'            self.copy_tkinter_var_to_bound_object()\n'
+                    code = code + f'            try:\n'
+                    code = code + f'                gui_binder.{attr_value}(event, obj)\n'
+                    code = code + f'            except AttributeError:\n'
+                    code = code + f'                pass\n'
+                    code = code + f'            try:\n'
+                    code = code + f'            self.copy_bound_object_to_tkinter_var()\n'
+                    code = code + f'        return\n'
+                    code = code + '\n'
+    code = code + f'    def win_close(self):\n'
+    code = code + f'        gui_binder = getattr(self, "gui_binder", None)\n'
+    code = code + f'        if gui_binder is not None and not isinstance(gui_binder, dict):\n'
+    code = code + f'            try:\n'
+    code = code + f'                gui_binder.win_close()\n'
+    code = code + f'            except AttributeError:\n'
+    code = code + f'                pass\n'
+    code = code + f'        return\n'
     return code
 
 
@@ -204,10 +239,10 @@ def place_widgets(code, m_parent_widget, widget_list):
                     # print(pyte_widget.name, attr_template, getattr(pyte_widget, attr))
                     event_method = getattr(pyte_widget, attr)
                     if event_method != '':
-                        code = code + f'        if gui_binder is not None and not isinstance(gui_binder, dict):\n'
-                        code = code + f'            self.{pyte_widget.name}.bind("{attr_template}", lambda\n' \
-                                      f'                             event, arg1=self.{pyte_widget.name}:\n' \
-                                      f'                             gui_binder.{event_method}(event, arg1))\n'
+                        code = code + f'        # if gui_binder is not None and not isinstance(gui_binder, dict):\n'
+                        code = code + f'        self.{pyte_widget.name}.bind("{attr_template}", lambda\n' \
+                                      f'                         event, arg1=self.{pyte_widget.name}:\n' \
+                                      f'                         self.{event_method}(event, arg1))\n'
             if (isinstance(pyte_widget, monet_widget_types.PytedGridContainerWidget) and
                     isinstance(m_parent_widget, monet_widget_types.Notebook)):
                 tab_text = getattr(pyte_widget, 'tab_text')
@@ -469,7 +504,7 @@ def parse_code(f):
                 load_widget_attr(f, widget, current_line2)
             current_line = f.readline()
             current_line2 = current_line.strip()
-            while current_line2 == '' or current_line2.startswith("if gui_binder is not None and not"):
+            while current_line2 == '' or current_line2.startswith("# if gui_binder is not None and not"):
                 current_line = f.readline()
                 current_line2 = current_line.strip()
         widgets.append(widget)

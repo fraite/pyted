@@ -8,18 +8,18 @@ class GuiBinder:
     def __init__(self):
         pass
         self.first_name = "Arthur"
-        self.surname = "Wensleydale"
+        self.surname = "Stilton"
         self.country = "UK"
         self.writer = "1"
         self.director = "0"
         self.actor = "1"
         self.cheese = "Stilton"
 
-    def entry1_button_1(self, obj, event):
+    def entry1_button_1(self, event, obj):
         return
 
     def win_close(self):
-        pass
+        return
 
 
 def init_tk_var(tk_var, gui_binder, tk_var_name):
@@ -52,6 +52,7 @@ class GuiCollection:
                 root = parent.master
             # generate top level window
             top_level = tkinter.Toplevel(parent)
+        self.root = root
         # new_widget(Project)
         # project_name = GuiCollection
         # new_widget(StringVar)
@@ -122,10 +123,10 @@ class GuiCollection:
         self.entry1.config(state="normal")
         self.entry1.config(relief="sunken")
         self.entry1.config(textvariable=self.first_name)
-        if gui_binder is not None and not isinstance(gui_binder, dict):
-            self.entry1.bind("<Button-1>", lambda
-                             event, arg1=self.entry1:
-                             gui_binder.entry1_button_1(event, arg1))
+        # if gui_binder is not None and not isinstance(gui_binder, dict):
+        self.entry1.bind("<Button-1>", lambda
+                         event, arg1=self.entry1:
+                         self.entry1_button_1(event, arg1))
         # new_widget(Entry)
         self.sur_name_entry = tkinter.Entry(self.frame1)
         self.sur_name_entry.grid(column="1")
@@ -336,14 +337,31 @@ class GuiCollection:
         top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)
 
         if parent is None:
-            root.mainloop()
+            if modal:
+                root.mainloop()
         else:
             if modal:
                 top_level.grab_set()
                 root.wait_window(top_level)
 
-    def win_close_ok(self, text):
-        self._cancel = text
+    def copy_bound_object_to_tkinter_var(self):
+        gui_binder = getattr(self, 'gui_binder', None)
+        if gui_binder is None:
+            pass
+        elif isinstance(gui_binder, dict):
+            for key in gui_binder:
+                try:
+                    getattr(self, key).set(gui_binder[key])
+                except AttributeError:
+                    pass
+        else:
+            for key in vars(gui_binder):
+                try:
+                    getattr(self, key).set(getattr(gui_binder, key))
+                except AttributeError:
+                    pass
+
+    def copy_tkinter_var_to_bound_object(self):
         gui_binder = getattr(self, 'gui_binder', None)
         if gui_binder is None:
             pass
@@ -353,15 +371,19 @@ class GuiCollection:
                     gui_binder[key] = getattr(self, key).get()
                 except AttributeError:
                     pass
-        elif isinstance(gui_binder, GuiBinder):
+        else:
             for key in vars(gui_binder):
                 try:
                     setattr(gui_binder, key, getattr(self, key).get())
                 except AttributeError:
                     pass
-            gui_binder.win_close()
-        else:
-            raise Exception('gui_binder not None, dict or GuiBinder')
+
+    def win_close_ok(self, text):
+        self._cancel = text
+        gui_binder = getattr(self, 'gui_binder', None)
+        self.copy_tkinter_var_to_bound_object()
+        if isinstance(gui_binder, GuiBinder):
+            self.win_close()
         self.gui_1.destroy()
 
     def win_close_cancel(self):
@@ -371,30 +393,95 @@ class GuiCollection:
             pass
         elif isinstance(gui_binder, dict):
             pass
-        elif isinstance(gui_binder, GuiBinder):
-            gui_binder.win_close()
         else:
-            raise Exception('gui_binder not None, dict or GuiBinder')
+            self.win_close()
         self.gui_1.destroy()
+
+    def entry1_button_1(self, event, obj):
+        gui_binder = getattr(self, 'gui_binder', None)
+        if gui_binder is not None and not isinstance(gui_binder, dict):
+            self.copy_tkinter_var_to_bound_object()
+            try:
+                gui_binder.entry1_button_1(event, obj)
+            except AttributeError:
+                pass
+            self.copy_bound_object_to_tkinter_var()
+        return
+
+    def win_close(self):
+        gui_binder = getattr(self, 'gui_binder', None)
+        if gui_binder is not None and not isinstance(gui_binder, dict):
+            try:
+                gui_binder.win_close()
+            except AttributeError:
+                pass
 
 
 def gui_1(gui_binder=None, parent=None, modal=True):
-    appl = GuiCollection(gui_binder, parent, modal)
+    gui_c = GuiCollection(gui_binder, parent, modal)
     if gui_binder is None or isinstance(gui_binder, dict):
-        if appl._cancel == True:
+        if gui_c._cancel == True:
             result_dict = {}
         else:
-            result_dict = {'_button': appl._cancel}
-            for key in vars(appl):
-                if isinstance(getattr(appl, key), tkinter.StringVar):
-                    result_dict[key] = getattr(appl, key).get()
+            result_dict = {'_button': gui_c._cancel}
+            for key in vars(gui_c):
+                if isinstance(getattr(gui_c, key), tkinter.StringVar):
+                    result_dict[key] = getattr(gui_c, key).get()
         return result_dict
     else:
-        return appl
+        return gui_c
+
+
+# finish here
+
+
+class GuiCollection2(GuiCollection):
+
+    def __init__(self, modal=True):
+        super().__init__(modal=modal)
+
+
+class GuiBinder2:
+    """binder for GuiCollection"""
+
+    def __init__(self):
+        pass
+        self.first_name = "Arthur"
+        self.surname = "Stilton"
+        self.country = "UK"
+        self.writer = "1"
+        self.director = "0"
+        self.actor = "1"
+        self.cheese = "Stilton"
+
+    def entry1_button_1(self, _event, _obj):
+        self.cheese = 'feta'
+
+    def win_close(self):
+        return
+
+
+def print_hello(event, obj):
+    print('hello')
 
 
 if __name__ == "__main__":
-    gui = gui_1()
-    print(gui)
 
+    # my_dict = None
 
+    my_dict = {'first_name': 'Henry'}
+
+    # my_dict = GuiBinder2()
+    # my_dict.cheese = 'Cheder'
+
+    my_gui = gui_1(my_dict)
+    print(my_gui)
+    print(my_dict)
+    # print(my_gui.first_name)
+    # print(my_dict.first_name)
+
+    # my_gui = GuiCollection2(modal=False)
+    # my_gui.first_name.set('Tim')
+    # my_gui.entry1_button_1 = print_hello
+    # my_gui.root.mainloop()
+    # print(my_gui.first_name.get(), my_gui._cancel)

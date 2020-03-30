@@ -1,5 +1,21 @@
-    def win_close_ok(self, text):
-        self._cancel = text
+    def copy_bound_object_to_tkinter_var(self):
+        gui_binder = getattr(self, 'gui_binder', None)
+        if gui_binder is None:
+            pass
+        elif isinstance(gui_binder, dict):
+            for key in gui_binder:
+                try:
+                    getattr(self, key).set(gui_binder[key])
+                except AttributeError:
+                    pass
+        else:
+            for key in vars(gui_binder):
+                try:
+                    getattr(self, key).set(getattr(gui_binder, key))
+                except AttributeError:
+                    pass
+
+    def copy_tkinter_var_to_bound_object(self):
         gui_binder = getattr(self, 'gui_binder', None)
         if gui_binder is None:
             pass
@@ -9,15 +25,19 @@
                     gui_binder[key] = getattr(self, key).get()
                 except AttributeError:
                     pass
-        elif isinstance(gui_binder, GuiBinder):
+        else:
             for key in vars(gui_binder):
                 try:
                     setattr(gui_binder, key, getattr(self, key).get())
                 except AttributeError:
                     pass
-            gui_binder.win_close()
-        else:
-            raise Exception('gui_binder not None, dict or GuiBinder')
+
+    def win_close_ok(self, text):
+        self._cancel = text
+        gui_binder = getattr(self, 'gui_binder', None)
+        self.copy_tkinter_var_to_bound_object()
+        if isinstance(gui_binder, GuiBinder):
+            self.win_close()
         self.gui_1.destroy()
 
     def win_close_cancel(self):
@@ -27,8 +47,6 @@
             pass
         elif isinstance(gui_binder, dict):
             pass
-        elif isinstance(gui_binder, GuiBinder):
-            gui_binder.win_close()
         else:
-            raise Exception('gui_binder not None, dict or GuiBinder')
+            self.win_close()
         self.gui_1.destroy()

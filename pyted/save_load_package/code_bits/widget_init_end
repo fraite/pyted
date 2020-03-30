@@ -1,5 +1,6 @@
         if parent is None:
-            root.mainloop()
+            if modal:
+                root.mainloop()
         else:
             if modal:
                 top_level.grab_set()
