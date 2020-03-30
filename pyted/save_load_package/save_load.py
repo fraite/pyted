@@ -84,9 +84,10 @@ def generate_code(widgets: Widgets) -> str:
     code_bit = code_bit.replace('{top_level_name}', top_level_widget.name)
     code = code + code_bit
     code = code + f'\n'
-    code = code + f'\n'
 
-    code = build_binder_class(code, widget_list)
+    code = build_binder_functions(code, widget_list)
+    code = code + f'\n'
+    code = code + f'\n'
 
     code = code + f'def {top_level_widget.name}(gui_binder=None, parent=None, modal=True):\n'
     code = code + f'    appl = {parent_widget}(gui_binder, parent, modal)\n'
@@ -145,7 +146,6 @@ def build_binder_functions(code, widgets):
                     code = code + f'                gui_binder.{attr_value}(event, obj)\n'
                     code = code + f'            except AttributeError:\n'
                     code = code + f'                pass\n'
-                    code = code + f'            try:\n'
                     code = code + f'            self.copy_bound_object_to_tkinter_var()\n'
                     code = code + f'        return\n'
                     code = code + '\n'
