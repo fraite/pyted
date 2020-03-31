@@ -452,6 +452,11 @@ class Entry(PytedPlacedWidget):
                                                     'options': None})
     # event attributes
     button_1: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Button-1>', 'options': None})
+    leave: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Leave>', 'options': None})
+    return_: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Return>', 'options': None})
+    key: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Key>', 'options': None})
+    focus_out: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<FocusOut>',
+                                                 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = tkinter.Entry(self.{self.parent})\n'
@@ -605,6 +610,11 @@ class TtkEntry(PytedPlacedWidget):
                                                     'options': None})
     # event attributes
     button_1: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Button-1>', 'options': None})
+    leave: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Leave>', 'options': None})
+    return_: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Return>', 'options': None})
+    key: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<Key>', 'options': None})
+    focus_out: str = field(default='', metadata={'type': STRING_EVENT_OPTION, 'template': '<FocusOut>',
+                                                 'options': None})
 
     def generate_code(self):
         code = f'self.{self.name} = ttk.Entry(self.{self.parent})\n'

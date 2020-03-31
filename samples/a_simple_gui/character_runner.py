@@ -1,4 +1,4 @@
-import samples.a_simple_gui.character_gui as character_gui
+import character_gui as character_gui
 
 
 def test_none():
