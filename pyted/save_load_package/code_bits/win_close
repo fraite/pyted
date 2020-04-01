@@ -32,21 +32,16 @@
                 except AttributeError:
                     pass
 
+    def win_init(self):
+        pass
+
     def win_close_ok(self, text):
         self._cancel = text
-        gui_binder = getattr(self, 'gui_binder', None)
         self.copy_tkinter_var_to_bound_object()
-        if isinstance(gui_binder, GuiBinder):
-            self.win_close()
+        self.win_close()
         self.gui_1.destroy()
 
     def win_close_cancel(self):
         self._cancel = True
-        gui_binder = getattr(self, 'gui_binder', None)
-        if gui_binder is None:
-            pass
-        elif isinstance(gui_binder, dict):
-            pass
-        else:
-            self.win_close()
+        self.win_close()
         self.gui_1.destroy()

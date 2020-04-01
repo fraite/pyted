@@ -1,7 +1,8 @@
 # Pyted Quick Start
 
 # Introduction
-As the project is starting out, there is limited documentation. This quick start document aims to show the features of
+As the project is starting out, there is limited documentation. This quick start document aims to show some of the
+ features of
 the program.
 
 # Installing the program
@@ -12,7 +13,7 @@ installed on your machine.
 Run the pyted.py script in python. The pyted GUI should appear.
 
 
-![Start page](pictures/1-start_page.png)
+![Start page](pictures/2-1-start_page.png)
 
 # Designing a new user GUI
 
@@ -26,7 +27,7 @@ To add a new widget to the design frame, select a widget from the widget picker 
 Tabs
 collect widget types together so that they can be easily found.
  
-![Widget picker](pictures/2-added_entry-annotated.png)
+![Widget picker](pictures/2-2-added_entry-annotated.png)
  
  For example the "Label" widget is found under the
 "tkinter" tab and the ttk version of the widget "TLabel" is found under the "ttk" tab. Press the "Label" button in the
@@ -86,7 +87,7 @@ The created user form can then be save by going into the file menu and selecting
 saved user forms is also a menu item under the file menu. For example it is possible to load "character_gui.py" from
 the sample directory of pyted.
 
-![character_gui.py](pictures/character_gui.png) 
+![character_gui.py](pictures/2-3-character_gui.png) 
 
 The character_gui shows the use of a number of different widgets and tkinter variables.
 
@@ -94,9 +95,8 @@ The character_gui shows the use of a number of different widgets and tkinter var
 
 The saved file is actually a Python script that can be run or loaded as a module. This script does not import any
 modules other than tkinter so should not have any dependencies. Additionally this script can work with any version of
-Python 3 and does not need Python 3.7 or newer. An example of a saved file is given in the "samples" directory in the
-file
-"character_gui.py".
+Python 3 and does not need Python 3.7 or newer. An example of a saved file is given in the "samples/a_simple_gui"
+directory in the file "character_gui.py".
 
 When the saved file is run as a script it will display the user form and then print all the tkinter variables defined.
 To make use of the saved file it can be imported by another Python 3 script. There are a number of ways to do this and
@@ -104,17 +104,18 @@ these can be seen in the "character_runner.py" file, found in the sample directo
 
 ## Adding code directly to the saved file
 
-It is fairly simple to add python code to add extra functionality. This has the disadvantage that if any changes
-need to be made to the gui it will no longer be possible to use pyted to make the change. The methods below allow
-changes to be made to the gui if required in the future if changes are needed. The methods also promote separation
-of gui code from the logic of the program, which is generally considered good coding style.
+It is fairly simple to add python code to the gui code to add extra functionality. This has the disadvantage that if
+any changes
+need to be made to the GUI it will no longer be possible to use pyted to make the change. The methods below allow
+changes to be made to the GUI id required in the future. The methods also promote separation
+of GUI code from the logic of the program, which is generally considered good coding style.
 
 ## Dictionary dialogue box method
 
 Once the saved file is imported, the user form can be called by a function call. For example, to use the
 "python_characters.py" file in the sample directory::
 
-    import samples.character_gui as character_gui
+    import character_gui as character_gui
     gui = character_gui.gui_1()
     print(gui)
 
@@ -130,7 +131,7 @@ The default values in the python_characters gui will be defined by the set value
 The input dictionary dialogue box method is similar to the dictionary dialogue box method but a dictionary object is
 passed as an argument in the function to define the default values::
 
-    import samples.character_gui as character_gui
+    import character_gui as character_gui
 
     my_dict = {'first_name': 'Henry', 'country': 'USA'}
     gui = character_gui.gui_1(my_dict)
@@ -152,4 +153,5 @@ demonstrated by replacing the last print statement as shown below.
 
 # Conclusions
 
-The above shows some of the features of the pyted program. There is still plenty of features to implement.
+The above shows some of the features of the pyted program. There are still plenty of other features and
+even more features to implement.

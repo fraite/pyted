@@ -38,11 +38,15 @@ def init_tk_var(tk_var, gui_binder, tk_var_name):
 class GuiCollection:
     """GuiCollection"""
 
-    def __init__(self, gui_binder=None, parent=None, modal=True):
+    def __init__(self, gui_binder=None, parent=None, mainloop=True, frame=None):
         self._cancel = None
         self.gui_binder = gui_binder
         self.parent = parent
-        if parent is None:
+        if frame is not None:
+            mainloop = False
+            root = None
+            top_level = frame
+        elif parent is None:
             root = tkinter.Tk()
             top_level = root
         else:
@@ -335,12 +339,13 @@ class GuiCollection:
         self.button2.config(text="Cancel")
         self.button2.config(command=self.win_close_cancel)
         top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)
+        self.win_init()
 
         if parent is None:
-            if modal:
+            if mainloop:
                 root.mainloop()
         else:
-            if modal:
+            if mainloop:
                 top_level.grab_set()
                 root.wait_window(top_level)
 
@@ -378,23 +383,18 @@ class GuiCollection:
                 except AttributeError:
                     pass
 
+    def win_init(self):
+        pass
+
     def win_close_ok(self, text):
         self._cancel = text
-        gui_binder = getattr(self, 'gui_binder', None)
         self.copy_tkinter_var_to_bound_object()
-        if isinstance(gui_binder, GuiBinder):
-            self.win_close()
+        self.win_close()
         self.gui_1.destroy()
 
     def win_close_cancel(self):
         self._cancel = True
-        gui_binder = getattr(self, 'gui_binder', None)
-        if gui_binder is None:
-            pass
-        elif isinstance(gui_binder, dict):
-            pass
-        else:
-            self.win_close()
+        self.win_close()
         self.gui_1.destroy()
 
     def entry1_button_1(self, event, obj):
@@ -418,8 +418,8 @@ class GuiCollection:
         return
 
 
-def gui_1(gui_binder=None, parent=None, modal=True):
-    appl = GuiCollection(gui_binder, parent, modal)
+def gui_1(gui_binder=None, parent=None, mainloop=True, frame=None):
+    appl = GuiCollection(gui_binder, parent, mainloop, frame)
     if gui_binder is None or isinstance(gui_binder, dict):
         if appl._cancel == True:
             result_dict = {}

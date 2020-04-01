@@ -18,7 +18,3 @@ if __name__ == "__main__":
     print('Use character GUI as a simple dialogue box with no input')
     test_none()
 
-    print('')
-    print('Pass data to character gui before opening using a dict')
-    test_dict()
-

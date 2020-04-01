@@ -1,5 +1,6 @@
 import temperature_conversion as tc
 
+
 class GuiBinder:
     """binder for GuiCollection"""
 
@@ -36,9 +37,10 @@ class GuiBinder:
         except ValueError:
             pass
 
+
 def test_event():
     gui_binder = GuiBinder()
-    app = tc.gui_1(gui_binder=gui_binder)
+    tc.gui_1(gui_binder=gui_binder)
 
 
 if __name__ == "__main__":

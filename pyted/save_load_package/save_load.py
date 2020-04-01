@@ -41,13 +41,17 @@ def generate_code(widgets: Widgets) -> str:
     code = code + f'class {parent_widget}:\n'
     code = code + f'    """{parent_widget}"""\n'
     code = code + f'\n'
-    code = code + f'    def __init__(self, gui_binder=None, parent=None, modal=True):\n'
+    code = code + f'    def __init__(self, gui_binder=None, parent=None, mainloop=True, frame=None):\n'
     code = code + f'        self._cancel = None\n'
     code = code + f'        self.gui_binder = gui_binder\n'
     code = code + f'        self.parent = parent\n'
 
     # if no parent passed generate a root top level widow, otherwise generate a new top level window
-    code = code + f'        if parent is None:\n'
+    code = code + f'        if frame is not None:\n'
+    code = code + f'            mainloop = False\n'
+    code = code + f'            root = None\n'
+    code = code + f'            top_level = frame\n'
+    code = code + f'        elif parent is None:\n'
     code = code + f'            root = tkinter.Tk()\n'
     code = code + f'            top_level = root\n'
     code = code + f'        else:\n'
@@ -73,6 +77,9 @@ def generate_code(widgets: Widgets) -> str:
     else:
         code = code + f'        top_level.protocol("WM_DELETE_WINDOW", self.win_close_cancel)'
     code = code + f'\n'
+
+    code = code + f'        self.win_init()'
+    code = code + f'\n'
     code = code + f'\n'
 
     code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'widget_init_end')
@@ -89,8 +96,8 @@ def generate_code(widgets: Widgets) -> str:
     code = code + f'\n'
     code = code + f'\n'
 
-    code = code + f'def {top_level_widget.name}(gui_binder=None, parent=None, modal=True):\n'
-    code = code + f'    appl = {parent_widget}(gui_binder, parent, modal)\n'
+    code = code + f'def {top_level_widget.name}(gui_binder=None, parent=None, mainloop=True, frame=None):\n'
+    code = code + f'    appl = {parent_widget}(gui_binder, parent, mainloop, frame)\n'
     # code = code + f'    return appl\n'
     code_bit = pkg_resources.read_text('pyted.save_load_package.code_bits', 'gui_runner_method')
     # code_bit = code_bit.replace('{top_level_name}', top_level_widget.name)

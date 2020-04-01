@@ -42,11 +42,15 @@ def init_tk_var(tk_var, gui_binder, tk_var_name):
 class GuiCollection:
     """GuiCollection"""
 
-    def __init__(self, gui_binder=None, parent=None, modal=True):
+    def __init__(self, gui_binder=None, parent=None, mainloop=True, frame=None):
         self._cancel = None
         self.gui_binder = gui_binder
         self.parent = parent
-        if parent is None:
+        if frame is not None:
+            mainloop = False
+            root = None
+            top_level = frame
+        elif parent is None:
             root = tkinter.Tk()
             top_level = root
         else:
@@ -155,10 +159,10 @@ class GuiCollection:
         top_level.protocol("WM_DELETE_WINDOW", lambda: self.win_close_ok(False))
 
         if parent is None:
-            if modal:
+            if mainloop:
                 root.mainloop()
         else:
-            if modal:
+            if mainloop:
                 top_level.grab_set()
                 root.wait_window(top_level)
 
@@ -269,8 +273,8 @@ class GuiCollection:
         return
 
 
-def gui_1(gui_binder=None, parent=None, modal=True):
-    appl = GuiCollection(gui_binder, parent, modal)
+def gui_1(gui_binder=None, parent=None, mainloop=True, frame=None):
+    appl = GuiCollection(gui_binder, parent, mainloop, frame)
     if gui_binder is None or isinstance(gui_binder, dict):
         if appl._cancel == True:
             result_dict = {}
