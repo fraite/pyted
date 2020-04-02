@@ -14,19 +14,12 @@ user GUI can sit within a single module. The following script shows an example:
 By passing some optional arguments into the gui_1() method above the way user GUI starts can be altered. The following
 arguments can be used.
 
-* parent - assigns the user GUI to the specified parent given (default None)
+* parent - assigns the user GUI to be the child of tkinter widget given (default None, the user GUI will be
+ a new root widget with no parent)
 * mainloop - if set to True the window will enter into the tkinter mainloop and the window will have to be closed before
   the python script continues. If False then the python script will continue. The user must arrange for the tkinter
-  mainloop to be started.
-* frame - rather than a new TopLevel window being created, the user GUI will be placed in the frame (or Toplevel)
-  specified. The modal flag is ignored and the user must ensure that tkinter mainloop is implemented.
-
-The root of user GUI is stored in the root attribute of the user GUI. This can be used be used the implement the
-tkinter mainloop. An example is given below:
-
-    import character_gui
-    gui.
-    gui = character_gui.gui_1(mainline=False)
-    gui.root.mainloop()
+  mainloop to be started. Does not fully work yet.
+* frame - rather than a new TopLevel window being created, the user GUI will be placed in the frame or Toplevel widget
+  specified. The mainloop flag is ignored and the user must ensure that tkinter mainloop is implemented.
 
 In the future some form of modal dialogue boxes may be implemented.
