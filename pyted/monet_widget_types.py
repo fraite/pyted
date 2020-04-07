@@ -578,7 +578,7 @@ class TtkLabel(PytedPlacedWidget):
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=ttk.Label, init=False)
     tab: str = field(default='ttk', init=False)
-    label: str = field(default='TLabel', init=False)
+    label: str = field(default='TtkLabel', init=False)
 
     # instance attributes
     width: str = field(default='0', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -600,7 +600,7 @@ class TtkEntry(PytedPlacedWidget):
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=ttk.Entry, init=False)
     tab: str = field(default='ttk', init=False)
-    label: str = field(default='TEntry', init=False)
+    label: str = field(default='TtkEntry', init=False)
 
     # instance attributes
     width: str = field(default='20', metadata={'type': SINGLE_INPUT, 'template': CONFIG_CODE, 'options': None})
@@ -650,7 +650,7 @@ class Listbox(PytedPlacedWidget):
 
 
 @dataclass
-class TtkCombobox(PytedPlacedWidget):
+class Combobox(PytedPlacedWidget):
 
     # class attributes (or as close as we can get to class attributes)
     type: type = field(default=ttk.Combobox, init=False)

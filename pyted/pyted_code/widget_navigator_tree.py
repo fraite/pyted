@@ -58,7 +58,7 @@ class NavigatorTree:
         # put project widget as main branch
         widget = self.widgets.widget_list[0]
         self.navigator_tree.insert('', 'end', widget.name,
-                                   text=widget.name, values='"' + repr(widget.type) + '"',
+                                   text=widget.name, values='"' + type(widget).__name__ + '"',
                                    tags='project')
         self.navigator_tree.item(widget.name, open=True)
         project_name = widget.name
@@ -71,13 +71,13 @@ class NavigatorTree:
                 is_var = False
             if is_var:
                 self.navigator_tree.insert(project_name, 'end', widget.name,
-                                           text=widget.name, values='"' + repr(widget.type) + '"',
+                                           text=widget.name, values='"' + type(widget).__name__ + '"',
                                            tags='var')
 
         # put widgets into tree
         widget = self.widgets.find_top_widget()
         self.navigator_tree.insert(self.widgets.widget_list[0].name, 'end', widget.name,
-                                   text=widget.name, values='"' + repr(widget.type) + '"',
+                                   text=widget.name, values='"' + type(widget).__name__ + '"',
                                    tags='toplevel')
         self.navigator_tree.item(widget.name, open=True)
         self.build_navigator_tree_parent(widget)
@@ -102,7 +102,7 @@ class NavigatorTree:
             if not widget_type == tkinter.Toplevel:
                 if widget.parent == parent.name:
                     self.navigator_tree.insert(widget.parent, 'end', widget.name,
-                                               text=widget.name, values='"' + repr(widget.type) + '"',
+                                               text=widget.name, values='"' + type(widget).__name__ + '"',
                                                tags='widget')
                     # TODO: change the below to use container widget superclass
                     if (isinstance(widget, pyted_widget_types.Frame) or isinstance(widget, pyted_widget_types.Notebook)
@@ -122,7 +122,7 @@ class NavigatorTree:
         old_item_is_open = self.navigator_tree.item(old_name, 'open')
         # print(old_item_is_open)
         self.navigator_tree.insert(item_parent, item_index, pyte_widget.name,
-                                   text=pyte_widget.name, values='"' + repr(pyte_widget.type) + '"',
+                                   text=pyte_widget.name, values='"' + type(pyte_widget).__name__ + '"',
                                    tags='widget')
         children = self.navigator_tree.get_children(old_name)
         for child in children:
